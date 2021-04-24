@@ -1,0 +1,25 @@
+#!/bin/bash
+
+#Esta función comprueba si eres root.
+#No acepta argumentos
+#Devuelve 0 si eres root y 1 si no lo eres.
+function f_eres_root {
+	if [[ $(whoami) = 'root' ]]
+		then
+			return 0
+		else
+			return 1
+	fi
+}
+
+#Esta función comprueba si eres root.
+#No acepta argumentos
+#Devuelve 0 si eres root y 1 si no lo eres.
+function f_eres_root {
+	if [[ $(whoami) = 'root' ]]
+		then
+			return 0
+		else
+			return 1
+	fi
+}

@@ -1,0 +1,16 @@
+Selecciona una opción del siguiente menú:
+
+1. Información sobre las máquinas virtuales existentes
+2. Crear máquina virtual
+3. Eliminar máquina virtual
+4. Modificar registros de máquinas virtuales
+5. Modificar la configuración de una máquina virtual
+6. Importar máquina virtual
+7. Exportar máquina virtual
+8. Lanzar máquina virtual
+9. Opciones de apagado/encendido
+10. Gestionar instantáneas
+11. Gestionar dispositivos de almacenamiento
+12. Gestionar el ancho de banda de las máquinas
+
+Opción:
