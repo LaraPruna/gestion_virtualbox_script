@@ -11,7 +11,10 @@ if [[ $(f_esta_instalado virtualbox;echo $?) = 1 ]]; then
 	echo 'No tienes instalado Virtualbox. ¿Quieres instalarlo? (s/n)'
 	read res1
 	if [[ $res1 = 's' ]]; then
-		f_instalar virtualbox
+		f_instalar_virtualbox
+		if [[ $(echo $?) = 3 ]]; then
+			exit
+		fi
 	else
 		echo 'Fin del programa.'
 		exit
