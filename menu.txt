@@ -12,5 +12,6 @@ Selecciona una opción del siguiente menú:
 10) Gestionar instantáneas
 11) Gestionar dispositivos de almacenamiento
 12) Gestionar el ancho de banda de las máquinas
+13) Salir
 
 Opción:

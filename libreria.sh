@@ -25,8 +25,9 @@ function f_esta_instalado {
 }
 
 #Esta función instala el paquete Virtualbox en Debian 10.
-#No acepta argumentos de entrada.
-#
+#No acepta argumentos de entrada, y necesitas ser root para ejecutarla.
+#Devuelve 0 una vez instalado el paquete de virtualbox, 1 si no eres root, 2 si virtualbox ya está instalado,
+#y 3 si ha habido algún error en la instalación.
 function f_instalar_virtualbox {
 	if [[ $(f_eres_root;echo $?) = 0 ]]; then
 		if [[ $(f_esta_instalado virtualbox;echo $?) = 1 ]]; then
@@ -59,4 +60,11 @@ function f_instalar_virtualbox {
 		echo 'No eres root.'
 		return 1
 	fi
+}
+
+#Esta función muestra información sobre todas las máquinas virtuales registradas en general.
+#No acepta argumentos de entrada.
+#
+function f_vminfo_ {
+	if [[ $() ]]
 }

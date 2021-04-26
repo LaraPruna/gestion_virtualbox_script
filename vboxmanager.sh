@@ -22,3 +22,9 @@ if [[ $(f_esta_instalado virtualbox;echo $?) = 1 ]]; then
 fi
 cat ./menu.txt
 read opcion
+while [[ $opcion > 0 && $opcion < 14 ]]; do
+	while [[ $opcion != 13 ]]; do
+		
+	cat ./menu.txt
+	read opcion
+done
