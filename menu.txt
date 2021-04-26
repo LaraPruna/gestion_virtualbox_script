@@ -1,6 +1,6 @@
 Selecciona una opción del siguiente menú:
 
-1) Información sobre las máquinas virtuales existentes
+1) Listar información sobre las máquinas
 2) Crear máquina virtual
 3) Eliminar máquina virtual
 4) Modificar registros de máquinas virtuales

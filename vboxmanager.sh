@@ -23,8 +23,14 @@ fi
 cat ./menu.txt
 read opcion
 while [[ $opcion > 0 && $opcion < 14 ]]; do
-	while [[ $opcion != 13 ]]; do
+	echo 'Error. Introduce una opción del menú.'
+	cat ./menu.txt
+	read opcion
+done
+while [[ $opcion != 13 ]]; do
+	if [[ $opcion = 1 ]]; then
 		
+	fi
 	cat ./menu.txt
 	read opcion
 done

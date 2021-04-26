@@ -62,9 +62,50 @@ function f_instalar_virtualbox {
 	fi
 }
 
-#Esta función muestra información sobre todas las máquinas virtuales registradas en general.
+#Esta función muestra información sobre las máquinas virtuales registradas. Mediante un menú guardado
+#en otro fichero y mostrado a través de esta función, el usuario podrá elegir el tipo de información
+#que busca en particular.
 #No acepta argumentos de entrada.
-#
 function f_vminfo_ {
-	if [[ $() ]]
+	cat ./info.txt
+	read opcion
+	while [[ $opcion != 16 ]]; do
+		if [[ $opcion = 1 ]]; then
+			vboxmanage list vms
+		elif [[ $opcion = 2 ]]; then
+                        vboxmanage list runningvms
+		elif [[ $opcion = 3 ]]; then
+                        vboxmanage list ostypes
+		elif [[ $opcion = 4 ]]; then
+                        vboxmanage list intnets
+		elif [[ $opcion = 5 ]]; then
+                        vboxmanage list bridgedifs
+		elif [[ $opcion = 6 ]]; then
+                        vboxmanage list hostonlyifs
+		elif [[ $opcion = 7 ]]; then
+                        vboxmanage list natnets
+		elif [[ $opcion = 8 ]]; then
+                        vboxmanage list dhcpservers
+		elif [[ $opcion = 9 ]]; then
+                        vboxmanage list hostinfo
+		elif [[ $opcion = 10 ]]; then
+                        vboxmanage list hdds
+		elif [[ $opcion = 11 ]]; then
+                        vboxmanage list dvds
+		elif [[ $opcion = 12 ]]; then
+                        vboxmanage list usbhost
+		elif [[ $opcion = 13 ]]; then
+                        vboxmanage list systemproperties
+		elif [[ $opcion = 14 ]]; then
+                        vboxmanage list extpacks
+		elif [[ $opcion = 15 ]]; then
+                        vboxmanage list groups
+		else
+			echo 'Error. Introduce una opción del menú.'
+		fi
+		cat ./info.txt
+	        read opcion
+	done
 }
+
+
