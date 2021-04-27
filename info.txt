@@ -1,0 +1,21 @@
+
+Selecciona una opción del siguiente menú:
+
+1) Máquinas virtuales registradas
+2) Máquinas virtuales en ejecución
+3) Sistemas operativos disponibles en Virtualbox
+4) Información sobre las redes internas
+5) Interfaces con adaptador puente disponibles
+6) Interfaces de red en solo-anfitrión disponibles
+7) Interfaces con NAT disponibles
+8) Servidores DHCP disponibles
+9) Información sobre el sistema anfitrión
+10) Discos duros en uso
+11) Discos de DVD en uso
+12) Información sobre los dispositivos USB conectados al host
+13) Configuración general de Virtualbox
+14) Paquetes de extensión instalados
+15) Grupos de máquinas virtuales
+16) Volver al menú principal
+
+Opción:
