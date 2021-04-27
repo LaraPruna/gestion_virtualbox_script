@@ -4,8 +4,8 @@ Selecciona una opción del siguiente menú:
 1) Mostrar información general sobre las máquinas
 2) Ver información sobre una máquina en particular
 3) Crear máquina virtual
-4) Eliminar máquina virtual
-5) Modificar registros de máquinas virtuales
+4) Modificar registros de máquinas virtuales
+5) Mover máquina virtual a otro directorio
 6) Modificar la configuración de una máquina virtual
 7) Importar máquina virtual
 8) Exportar máquina virtual

@@ -2,11 +2,6 @@
 
 . ./libreria.sh
 
-if [[ $(f_eres_root;echo $?) = 0 ]]; then
-        echo 'Ejecuta el programa con tu usuario.'
-        exit
-fi
-
 echo 'Inicio del programa. Comprobando el estado del paquete virtualbox...'
 if [[ $(f_esta_instalado virtualbox;echo $?) = 1 ]]; then
 	echo 'No tienes instalado Virtualbox. ¿Quieres instalarlo? (s/n)'
@@ -24,6 +19,9 @@ if [[ $(f_esta_instalado virtualbox;echo $?) = 1 ]]; then
 		exit
 	fi
 fi
+if [[ $(f_eres_root;echo $?) = 0 ]]; then
+        echo 'Se recomienda entrar como usuario en este programa.'
+fi
 cat ./menu.txt
 read opcion
 while [[ $opcion != 14 ]]; do
@@ -35,6 +33,20 @@ while [[ $opcion != 14 ]]; do
 		f_vminfo $mv1
 	elif [[ $opcion = 3 ]]; then
 		f_crearvm
+	elif [[ $opcion = 4 ]]; then
+		cat ./registros.txt
+		read opcion2
+		while [[ $opcion2 != 3 ]]; do
+			if [[ $opcion2 = 1 ]]; then
+				f_registrarvm
+			elif [[ $opcion2 = 2 ]]; then
+				f_eliminar_registro_vm
+			else
+				echo 'Opción incorrecta.'
+			fi
+			cat ./registros.txt
+                	read opcion2
+		done
 	else
 		echo 'Error. Introduce una opción del menú.'
 	fi

@@ -1,0 +1,10 @@
+
+¿Quieres eliminar también los siguientes ficheros? (s/n)
+
+- Discos duros usados solo por esa máquina.
+- Ficheros de estado guardados por la máquina.
+- El archivo XML de la máquina y sus copias de seguridad.
+- El historial de la máquina.
+- El directorio donde se encuentra la máquina, si se queda vacía tras eliminar su registro.
+
+Respuesta:

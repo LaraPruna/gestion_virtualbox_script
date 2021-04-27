@@ -1,0 +1,8 @@
+
+¿Qué deseas hacer?
+
+1) Registrar una máquina virtual
+2) Eliminar el registro de una máquina virtual
+3) Volver al menú principal
+
+Opción:

@@ -74,9 +74,9 @@ function f_instalar_virtualbox {
 	fi
 }
 
-#Esta función muestra información general sobre las máquinas virtuales registradas. Mediante un menú guardado
-#en otro fichero y mostrado a través de esta función, el usuario podrá elegir el tipo de información
-#que busca en particular.
+#Esta función muestra información general sobre las máquinas virtuales registradas y la configuración
+#de VirtualBox. Mediante un menú guardado en otro fichero y mostrado a través de esta función,
+#el usuario podrá elegir el tipo de información que busca en particular.
 #No acepta argumentos de entrada.
 function f_vmsinfo {
 	cat ./info.txt
@@ -250,9 +250,9 @@ function f_crearvm {
 	if [[ $reg = 's' ]]; then
 		if [[ $ruta = $null ]]; then
 			if [[ $grupo = $null ]]; then
-				vboxmanage createvm --name $nombre --basefolder /home/usuario/VirtualBox\ VMs/ --ostype $os --register
+				vboxmanage createvm --name $nombre --basefolder /home/$USER/VirtualBox\ VMs/ --ostype $os --register
 			else
-				vboxmanage createvm --name $nombre --basefolder /home/usuario/VirtualBox\ VMs/ --group $grupo --ostype $os --register
+				vboxmanage createvm --name $nombre --basefolder /home/$USER/VirtualBox\ VMs/ --group $grupo --ostype $os --register
 			fi
 		else
 			if [[ $grupo = $null ]]; then
@@ -265,9 +265,9 @@ function f_crearvm {
 	else
 		if [[ $ruta = $null ]]; then
 			if [[ $grupo = $null ]]; then
-				vboxmanage createvm --name $nombre --basefolder /home/usuario/VirtualBox\ VMs/ --ostype $os
+				vboxmanage createvm --name $nombre --basefolder /home/$USER/VirtualBox\ VMs/ --ostype $os
 			else
-				vboxmanage createvm --name $nombre --basefolder /home/usuario/VirtualBox\ VMs/ --group $grupo --ostype $os
+				vboxmanage createvm --name $nombre --basefolder /home/$USER/VirtualBox\ VMs/ --group $grupo --ostype $os
 			fi
 		else
 			if [[ $grupo = $null ]]; then
@@ -279,3 +279,72 @@ function f_crearvm {
 		echo 'Máquina virtual creada. Puedes registrarla y configurarla desde el menú principal.'
 	fi
 }
+
+#Esta función registra una máquina virtual en Virtualbox.
+#No acepta argumentos de entrada.
+#Devuelve 0 al registrar la máquina virtual, 1 si no se ha encontrado la ruta,
+#2 si se ha introducido una opción incorrecta y 3 si ha habido algún error durante el registro.
+function f_registrarvm {
+	echo '¿La máquina virtual se ha guardado en la ruta por defecto o en otro directorio?'
+	echo '1) Ruta por defecto'
+	echo '2) Otro directorio'
+	echo 'Opción:'
+	read opcion
+	if [[ $opcion = 1 ]]; then
+		echo 'Introduce el nombre de la máquina virtual:'
+		read vm
+		if [[ $(f_existe_directorio /home/$USER/VirtualBox\ VMs/$vm;echo $?) = 0 ]]; then
+			vboxmanage registervm /home/$USER/VirtualBox\ VMs/$vm/$vm.vbox
+			if [[ $(vboxmanage showvminfo $vm &> /dev/null;echo $?) = 0 ]]; then
+				echo 'Máquina registrada.'
+				return 0
+			else
+				echo 'Error. Máquina no registrada.'
+				return 3
+			fi
+		else
+			echo 'Máquina no encontrada. Vuelve a intentarlo.'
+			return 1
+		fi
+	elif [[ $opcion = 2 ]]; then
+		echo 'Introduce la ruta absoluta de la máquina virtual:'
+		read vm
+		if [[ $(f_existe_directorio $vm;echo $?) = 0 ]]; then
+			vboxmanage registervm $vm
+			if [[ $(vboxmanage showvminfo $vm &> /dev/null;echo $?) = 0 ]]; then
+				echo 'Máquina registrada.'
+				return 0
+			else
+				echo 'Error. Máquina no registrada.'
+				return 3
+			fi
+		else
+			echo 'Ruta no encontrada. Vuelve a intentarlo.'
+			return 1
+		fi
+	else
+		echo 'Opción incorrecta.'
+		return 2
+	fi
+}
+
+#Esta función elimina el registro de una máquina virtual en Virtualbox.
+#No acepta argumentos de entrada.
+function f_eliminar_registro_vm {
+	echo 'Introduce el nombre de la máquina virtual:'
+	read vm
+	if [[ $(vboxmanage showvminfo $vm &> /dev/null; echo $?) = 1 ]]; then
+		echo 'No hay ninguna máquina virtual registrada con ese nombre.'
+	else
+		cat ./elimreg.txt
+		read res
+		if [[ $res = 's' ]]; then
+			vboxmanage unregistervm $vm --delete &> /dev/null
+		else
+			vboxmanage unregistervm $vm &> /dev/null
+		fi
+		echo 'Registro de máquina eliminado.'
+	fi
+}
+
+
