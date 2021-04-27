@@ -200,7 +200,7 @@ function f_vminfo {
 function f_crearvm {
 	echo '¿Cómo quieres llamar a la máquina?'
 	read nombre
-	echo 'Introduce la ruta del directorio donde quieres guardarla (por defecto, /home/usuario/VirtualBox VMs):'
+	echo 'Introduce la ruta del directorio donde quieres guardarla (por defecto, ~/VirtualBox VMs/):'
 	read ruta
 	if [[ $ruta != $null ]]; then
 		while [[ $(cd $ruta;echo $?) = 1 ]]; do
@@ -215,7 +215,7 @@ function f_crearvm {
 		echo 'Ese directorio no existe. Introduce otra ruta:'
 		read ruta
 		if [[ $ruta = $null ]]; then
-                	ruta="/home/usuario/VirtualBox\ VMs/"
+                	ruta="/home/$USER/VirtualBox\ VMs/"
 	        fi
 	done
 	echo 'Introduce el nombre del grupo que quieras asignarle a la máquina (por defecto "/"):'
@@ -336,7 +336,7 @@ function f_eliminar_registro_vm {
 	if [[ $(vboxmanage showvminfo $vm &> /dev/null; echo $?) = 1 ]]; then
 		echo 'No hay ninguna máquina virtual registrada con ese nombre.'
 	else
-		cat ./elimreg.txt
+		cat ./registros/elimreg.txt
 		read res
 		if [[ $res = 's' ]]; then
 			vboxmanage unregistervm $vm --delete &> /dev/null
@@ -347,4 +347,44 @@ function f_eliminar_registro_vm {
 	fi
 }
 
+#Esta función mueve una máquina virtual a otro directorio.
+#No acepta argumentos de entrada.
+#Devuelve 0 al mover la máquina de directorio, 1 si no se introduce un nombre de máquina incorrecto,
+#2 si se introduce una ruta incorrecta y 3 si ocurre algún error durante el intento de desplazamiento.
+function f_movervm {
+	echo 'Introduce el nombre de la máquina virtual:'
+	read vm
+	if [[ $(vboxmanage showvminfo $vm &> /dev/null;echo $?) = 0 ]]; then
+		echo 'Introduce la ruta relativa o absoluta del nuevo directorio (por defecto, ~/VirtualBox VMs/):'
+		read dir
+		if [[ $dir = $null ]]; then
+                        vboxmanage movevm $vm --type basic --folder /home/$USER/VirtualBox\ VMs/ &> /dev/null
+			if [[ $(f_existe_directorio /home/$USER/VirtualBox\ VMs/$vm;echo $?) = 0 ]]; then
+				echo 'Desplazamiento realizado correctamente.'
+				return 0
+			else
+				echo 'Error. No se ha podido mover la máquina de directorio.'
+				return 3
+			fi
+		else
+			if [[ $(f_existe_directorio $dir;echo $?) = 0 ]]; then
+				vboxmanage movevm $vm --type basic --folder $dir &> /dev/null
+				if [[ $(f_existe_directorio $dir/$vm;echo $?) = 0 ]]; then
+					echo 'Desplazamiento realizado correctamente.'
+					return 0
+				else
+					echo 'Error. No se ha podido mover la máquina de directorio.'
+					return 3
+				fi
+			else
+				echo 'Directorio no encontrado.'
+				return 2
+			fi
+		fi
+	else
+		echo 'No hay ninguna máquina registrada con ese nombre.'
+		return 1
+	fi
+}
 
+#

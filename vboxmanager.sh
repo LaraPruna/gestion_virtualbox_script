@@ -34,7 +34,7 @@ while [[ $opcion != 14 ]]; do
 	elif [[ $opcion = 3 ]]; then
 		f_crearvm
 	elif [[ $opcion = 4 ]]; then
-		cat ./registros.txt
+		cat ./registros/registros.txt
 		read opcion2
 		while [[ $opcion2 != 3 ]]; do
 			if [[ $opcion2 = 1 ]]; then
@@ -44,9 +44,11 @@ while [[ $opcion != 14 ]]; do
 			else
 				echo 'Opción incorrecta.'
 			fi
-			cat ./registros.txt
+			cat ./registros/registros.txt
                 	read opcion2
 		done
+	elif [[ $opcion = 5 ]]; then
+		f_movervm
 	else
 		echo 'Error. Introduce una opción del menú.'
 	fi
