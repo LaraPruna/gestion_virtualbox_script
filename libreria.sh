@@ -207,7 +207,7 @@ function f_crearvm {
         	        echo 'Ese directorio no existe. Introduce otra ruta:'
         	        read ruta
                 	if [[ $ruta = $null ]]; then
-	                	continue
+	                	ruta="/home/$USER/VirtualBox\ VMs/"
                 	fi
         	done
 	fi
@@ -248,33 +248,17 @@ function f_crearvm {
 	read reg
 	echo 'Creando máquina virtual...'
 	if [[ $reg = 's' ]]; then
-		if [[ $ruta = $null ]]; then
-			if [[ $grupo = $null ]]; then
-				vboxmanage createvm --name $nombre --basefolder /home/$USER/VirtualBox\ VMs/ --ostype $os --register
-			else
-				vboxmanage createvm --name $nombre --basefolder /home/$USER/VirtualBox\ VMs/ --group $grupo --ostype $os --register
-			fi
+		if [[ $grupo = $null ]]; then
+			vboxmanage createvm --name $nombre --basefolder "$ruta" --ostype $os --register
 		else
-			if [[ $grupo = $null ]]; then
-				vboxmanage createvm --name $nombre --basefolder $ruta --ostype $os --register
-			else
-				vboxmanage createvm --name $nombre --basefolder $ruta --group $grupo --ostype $os --register
-			fi
-                        echo 'La máquina virtual se ha creado con el hardware mínimo. Puedes configurarla desde el menú principal.'
+			vboxmanage createvm --name $nombre --basefolder "$ruta" --group $grupo --ostype $os --register
 		fi
+                echo 'La máquina virtual se ha creado con el hardware mínimo. Puedes configurarla desde el menú principal.'
 	else
-		if [[ $ruta = $null ]]; then
-			if [[ $grupo = $null ]]; then
-				vboxmanage createvm --name $nombre --basefolder /home/$USER/VirtualBox\ VMs/ --ostype $os
-			else
-				vboxmanage createvm --name $nombre --basefolder /home/$USER/VirtualBox\ VMs/ --group $grupo --ostype $os
-			fi
+		if [[ $grupo = $null ]]; then
+			vboxmanage createvm --name $nombre --basefolder "$ruta" --ostype $os
 		else
-			if [[ $grupo = $null ]]; then
-				vboxmanage createvm --name $nombre --basefolder $ruta --ostype $os
-			else
-				vboxmanage createvm --name $nombre --basefolder $ruta --group $grupo --ostype $os
-			fi
+			vboxmanage createvm --name $nombre --basefolder "$ruta" --group $grupo --ostype $os
 		fi
 		echo 'La máquina virtual se ha creado con el hardware mínimo. Puedes registrarla y configurarla desde el menú principal.'
 	fi
@@ -462,7 +446,7 @@ function f_config_general {
 			echo 'Introduce la ruta de la imagen:'
 			read ruta
 			if [[ -e $ruta ]]; then
-				vboxmanage modifyvm $1 --iconfile $ruta
+				vboxmanage modifyvm $1 --iconfile "$ruta"
 				echo 'Icono cambiado.'
 				return 0
 			else
@@ -478,7 +462,7 @@ function f_config_general {
 				return 0
 			else
 				if [[ $(f_existe_directorio $ruta;echo $?) ]]; then
-					vboxmanage modifyvm $1 --snapshotfolder $ruta
+					vboxmanage modifyvm $1 --snapshotfolder "$ruta"
 					if [[ $(vboxmanage modifyvm $1 | egrep Snapshot | awk '{print $3}') = $ruta ]]; then
 						echo 'Ruta de instantáneas modificada.'
 						return 0

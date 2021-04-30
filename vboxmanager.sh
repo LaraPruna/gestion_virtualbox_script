@@ -55,10 +55,12 @@ while [[ $opcion != 14 ]]; do
 		if [[ $(vboxmanage showvminfo $vm &> /dev/null;echo $?) = 0 ]]; then
 			cat ./vmconfig/vmconfig.txt
 			read opcion2
-			while [[ $opcion2 != 9 ]]; do
+			while [[ $opcion2 != 10 ]]; do
 				if [[ $opcion2 = 1 ]]; then
 					f_config_general $vm
 				fi
+				cat ./vmconfig/vmconfig.txt
+	                        read opcion2
 			done
 		else
 			echo 'No hay ninguna máquina registrada con ese nombre.'
