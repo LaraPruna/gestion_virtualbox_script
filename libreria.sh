@@ -54,7 +54,7 @@ function f_instalar_virtualbox {
 			echo 'Añadiendo claves de Oracle...'
 			wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add - &> /dev/null
 			wget -q https://www.virtualbox.org/download/oracle_vbox.asc -O- | sudo apt-key add - &> /dev/null
-			echo 'Instalando virtualbox...'
+para 			echo 'Instalando virtualbox...'
 			echo 'La instalación puede durar varios minutos.'
 			apt-get install -y virtualbox-6.0 &> /dev/null
 			if [[ $(f_esta_instalado virtualbox;echo $?) = 0 ]]; then
@@ -260,7 +260,7 @@ function f_crearvm {
 			else
 				vboxmanage createvm --name $nombre --basefolder $ruta --group $grupo --ostype $os --register
 			fi
-                        echo 'Máquina virtual creada. Puedes configurarla desde el menú principal.'
+                        echo 'La máquina virtual se ha creado con el hardware mínimo. Puedes configurarla desde el menú principal.'
 		fi
 	else
 		if [[ $ruta = $null ]]; then
@@ -276,7 +276,7 @@ function f_crearvm {
 				vboxmanage createvm --name $nombre --basefolder $ruta --group $grupo --ostype $os
 			fi
 		fi
-		echo 'Máquina virtual creada. Puedes registrarla y configurarla desde el menú principal.'
+		echo 'La máquina virtual se ha creado con el hardware mínimo. Puedes registrarla y configurarla desde el menú principal.'
 	fi
 }
 
@@ -387,4 +387,138 @@ function f_movervm {
 	fi
 }
 
-#
+#Esta función modifica los ajustes básicos de una máquina virtual.
+#Acepta como argumento el nombre de la máquina virtual.
+#En determinadas opciones, devuelve los siguientes códigos:
+#- Nombre: 0 si se ha cambiado el nombre y 1 si no se ha cambiado.
+#- Grupo: 0 si se ha cambiado el grupo, 1 si no se ha podido cambiar y 2 si se ha introducido un grupo incorrecto.
+#- Sistema operativo: 0 si se ha cambiado, 1 si no se ha podido cambiar y 2 si se ha introducido un sistema incorrecto.
+#- Fichero de icono: 0 si se ha cambiado y 1 si se ha introducido una ruta incorrecta.
+#- Directorio de instantáneas: 0 si se ha cambiado la ruta, 1 si no se ha podido cambiar y 2 si se ha introducido una ruta incorrecta.
+function f_config_general {
+	cat ./vmconfig/general.txt
+	read opcion
+	while [[ $opcion != 9 ]]; do
+		if [[ $opcion = 1 ]]; then
+			echo 'Introduce el nuevo nombre de la máquina:'
+			read nombre
+			vboxmanage modifyvm $1 --name $nombre
+			if [[ $(vboxmanage showvminfo $nombre &> /dev/null; echo $?) = 0 ]]; then
+				echo 'Nombre cambiado.'
+				return 0
+			else
+				echo 'Error. Nombre no cambiado.'
+				return 1
+			fi
+		elif [[ $opcion = 2 ]]; then
+			echo '¿Cuántos grupos quieres introducir?'
+			read num
+			for i in {1..$num}; do
+				echo "Grupo:"
+				read grupo
+				if [[ $(vboxmanage list groups | egrep $grupo) ]]; then
+					vboxmanage modifyvm $1 --groups $grupo
+					if [[ $(vboxmanage showvminfo $1 | egrep Groups | egrep $grupo) ]]; then
+						echo 'Máquina añadida al grupo.'
+						return 0
+					else
+						echo 'Error. La máquina no se ha añadido al grupo.'
+						return 1
+					fi
+				else
+					echo 'No hay ningún grupo registrado con ese nombre.'
+					return 2
+				fi
+			done
+			echo 'La máquina se encuentra ahora en los siguientes grupos:'
+			vboxmanage showvminfo $1 | egrep Groups | awk '{print $2}'
+		elif [[ $opcion = 3 ]]; then
+			echo 'Introduce la nueva descripción:'
+			read descripcion
+			vboxmanage modifyvm $1 --description "$descripcion"
+			echo 'Descripción modificada.'
+		elif [[ $opcion = 4 ]]; then
+			echo 'Introduce el nuevo sistema operativo (L para ver la lista de sistemas operativos disponibles):'
+			read os
+			while [[ $os = 'L' ]]; do
+				vboxmanage list ostypes
+				echo 'Introduce el nuevo sistema operativo (L para ver la lista de sistemas operativos disponibles):'
+                        	read os
+			done
+			if [[ $(vboxmanage list ostypes | egrep $os) ]]; then
+				vboxmanage modifyvm $1 --ostype $os
+				if [[ $(vboxmanage showvminfo $1 | awk '{print $3}' | egrep $os) ]]; then
+					echo 'Sistema operativo modificado.'
+					return 0
+				else
+					echo 'Error. No se ha cambiado el sistema operativo.'
+					return 1
+				fi
+			else
+				echo 'No hay disponible ningún sistema operativo con ese nombre.'
+				return 2
+			fi
+		elif [[ $opcion = 5 ]]; then
+			echo 'Introduce la ruta de la imagen:'
+			read ruta
+			if [[ -e $ruta ]]; then
+				vboxmanage modifyvm $1 --iconfile $ruta
+				echo 'Icono cambiado.'
+				return 0
+			else
+				echo 'La ruta introducida no existe.'
+				return 1
+			fi
+		elif [[ $opcion = 6 ]]; then
+			echo 'Introduce la nueva ruta (INTRO si quieres selecccionar la ruta por defecto):'
+			read ruta
+			if [[ $ruta = $null ]]; then
+				vboxmanage modifyvm $1 --snapshotfolder default
+				echo 'Ruta de instantáneas modificada.'
+				return 0
+			else
+				if [[ $(f_existe_directorio $ruta;echo $?) ]]; then
+					vboxmanage modifyvm $1 --snapshotfolder $ruta
+					if [[ $(vboxmanage modifyvm $1 | egrep Snapshot | awk '{print $3}') = $ruta ]]; then
+						echo 'Ruta de instantáneas modificada.'
+						return 0
+					else
+						echo 'Error. Ruta no modificada.'
+						return 1
+					fi
+				else
+					echo 'Ruta no encontrada.'
+					return 2
+				fi
+			fi
+		elif [[ $opcion = 7 ]]; then
+			cat ./vmconfig/clipdrag.txt
+			read opcion2
+			if [[ $opcion2 = 1 ]]; then
+				vboxmanage modifyvm $1 --clipboard disabled
+			elif [[ $opcion2 = 2 ]]; then
+				vboxmanage modifyvm $1 --clipboard hosttoguest
+			elif [[ $opcion2 = 3 ]]; then
+				vboxmanage modifyvm $1 --clipboard guesttohost
+			elif [[ $opcion2 = 4 ]]; then
+				vboxmanage modifyvm $1 --clipboard bidirectional
+			fi
+		elif [[ $opcion = 8 ]]; then
+			cat ./vmconfig/clipdrag.txt
+			read opcion2
+			if [[ $opcion2 = 1 ]]; then
+                                vboxmanage modifyvm $1 --draganddrop disabled
+                        elif [[ $opcion2 = 2 ]]; then
+                                vboxmanage modifyvm $1 --draganddrop hosttoguest
+                        elif [[ $opcion2 = 3 ]]; then
+                                vboxmanage modifyvm $1 --draganddrop guesttohost
+                        elif [[ $opcion2 = 4 ]]; then
+                                vboxmanage modifyvm $1 --draganddrop bidirectional
+                        fi
+		else
+			echo 'Opción incorrecta. Introduce una opción del menú.'
+		fi
+		cat ./vmconfig/general.txt
+		read opcion
+	done
+}

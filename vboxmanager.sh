@@ -49,6 +49,20 @@ while [[ $opcion != 14 ]]; do
 		done
 	elif [[ $opcion = 5 ]]; then
 		f_movervm
+	elif [[ $opcion = 6 ]]; then
+		echo 'Introduce el nombre de la máquina virtual que quieres configurar:'
+		read vm
+		if [[ $(vboxmanage showvminfo $vm &> /dev/null;echo $?) = 0 ]]; then
+			cat ./vmconfig/vmconfig.txt
+			read opcion2
+			while [[ $opcion2 != 9 ]]; do
+				if [[ $opcion2 = 1 ]]; then
+					f_config_general $vm
+				fi
+			done
+		else
+			echo 'No hay ninguna máquina registrada con ese nombre.'
+		fi
 	else
 		echo 'Error. Introduce una opción del menú.'
 	fi

@@ -10,5 +10,6 @@
 7) Puertos serie
 8) USB
 9) Carpetas compartidas
+10) Volver al menú principal
 
 Opción:
