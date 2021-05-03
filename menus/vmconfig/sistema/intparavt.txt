@@ -1,0 +1,11 @@
+
+Elije una interfaz de las siguientes:
+
+1) Ninguna
+2) Predeterminada
+3) Heredada
+4) Mínima
+5) Hyper-V
+6) KVM
+
+Opción:

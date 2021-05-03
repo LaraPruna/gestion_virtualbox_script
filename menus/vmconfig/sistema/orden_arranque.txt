@@ -1,0 +1,9 @@
+
+
+1) Disco duro
+2) Óptica
+3) Red
+4) Disquete
+5) Ninguno
+
+Opción:

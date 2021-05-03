@@ -1,0 +1,9 @@
+
+Selecciona un dispositivo apuntador de los siguientes:
+
+1) Ratón PS/2
+2) Ratón USB
+3) Tableta USB
+4) Tableta multitáctil USB
+
+Opción:

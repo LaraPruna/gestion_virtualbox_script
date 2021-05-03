@@ -1,0 +1,15 @@
+
+¿Qué deseas modificar?
+
+1) Memoria
+2) Orden de arranque
+3) Chipset
+4) Dispositivo apuntador
+5) Características extendidas de la placa base
+6) Número de procesadores
+7) Limite de ejecución
+8) Características extendidas del procesador
+9) Opciones de virtualización
+10) Volver al menú anterior
+
+Opción:

@@ -1,0 +1,8 @@
+
+Selecciona una de las siguientes opciones:
+
+1) (Des)habilitar PAE
+2) (Des)habilitar VT-x/AMD-V anidado
+3) Volver al menú anterior
+
+Opción:

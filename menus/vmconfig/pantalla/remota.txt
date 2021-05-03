@@ -1,0 +1,10 @@
+
+Selecciona una opción del siguiente menú:
+
+1) Establecer un puerto para el servidor remoto
+2) Establecer la dirección IP del servidor
+3) Cambiar el modo de autenticación
+4) (Des)habilitar múltiples conexiones
+5) Volver al menú anterior
+
+Opción:

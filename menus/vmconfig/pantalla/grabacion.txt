@@ -1,0 +1,13 @@
+
+Selecciona una opción del siguiente menú:
+
+1) Especificar pantalla(s) para la grabación
+2) Cambiar ruta del archivo de grabación
+3) Establecer el tamaño máximo del vídeo
+4) Establecer el tiempo máximo de grabación
+5) Especificar un máximo de fotogramas por segundo
+6) Especificar la tasa de bits por segundo
+7) Cambiar la resolución del vídeo
+8) Volver al menú anterior
+
+Opción:

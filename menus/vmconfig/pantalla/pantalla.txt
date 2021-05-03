@@ -1,0 +1,12 @@
+
+¿Qué deseas modificar?
+
+1) Memoria de vídeo
+2) Número de monitores
+3) Controlador gráfico
+4) Aceleración 3D
+5) Opciones de pantalla remota
+6) Opciones de grabación
+7) Volver al menú anterior
+
+Opción:

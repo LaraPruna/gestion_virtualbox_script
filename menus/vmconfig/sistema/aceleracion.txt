@@ -1,0 +1,8 @@
+
+Selecciona una opción del siguiente menú:
+
+1) Cambiar interfaz de paravirtualización
+2) (Des)habilitar hardware de virtualización
+3) Volver al menú anterior
+
+Opción:

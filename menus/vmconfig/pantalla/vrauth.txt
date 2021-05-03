@@ -1,0 +1,8 @@
+
+Elige un modo de autenticación del siguiente menú:
+
+1) Nulo
+2) Externo
+3) Invitado
+
+Opción:

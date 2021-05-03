@@ -1,0 +1,14 @@
+
+¿Qué quieres modificar?
+
+1) Nombre
+2) Grupo
+3) Descripción
+4) Sistema operativo
+5) Icono de la máquina en Virtualbox
+6) Directorio de guardado de instantáneas
+7) Opciones para compartir portapapeles
+8) Opciones para arrastrar y soltar
+9) Volver al menú anterior
+
+Opción:

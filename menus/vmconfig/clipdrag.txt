@@ -1,0 +1,9 @@
+
+Selecciona una opción del siguiente menú:
+
+1) Inhabilitado
+2) Anfitrión a invitado
+3) Invitado a anfitrión
+4) Bidireccional
+
+Opción:

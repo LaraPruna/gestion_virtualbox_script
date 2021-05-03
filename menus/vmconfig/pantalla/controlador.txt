@@ -1,0 +1,9 @@
+
+¿Qué controlador gráfico quieres asignar a la máquina?
+
+1) Ninguno
+2) VBoxVGA
+3) VMSVGA
+4) VBoxSVGA
+
+Opción:

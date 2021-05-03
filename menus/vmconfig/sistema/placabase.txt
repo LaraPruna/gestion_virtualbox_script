@@ -1,0 +1,10 @@
+
+Selecciona una de las siguientes opciones:
+
+1) (Des)habilitar I/O APIC
+2) (Des)habilitar ACPI
+3) (Des)habilitar EFI (sólo SO especiales)
+4) Reloj hardware en tiempo UTC
+5) Volver al menú anterior
+
+Opción:
