@@ -54,7 +54,7 @@ function f_instalar_virtualbox {
 			echo 'Añadiendo claves de Oracle...'
 			wget -q https://www.virtualbox.org/download/oracle_vbox_2016.asc -O- | sudo apt-key add - &> /dev/null
 			wget -q https://www.virtualbox.org/download/oracle_vbox.asc -O- | sudo apt-key add - &> /dev/null
-para 			echo 'Instalando virtualbox...'
+ 			echo 'Instalando virtualbox...'
 			echo 'La instalación puede durar varios minutos.'
 			apt-get install -y virtualbox-6.0 &> /dev/null
 			if [[ $(f_esta_instalado virtualbox;echo $?) = 0 ]]; then
@@ -79,7 +79,7 @@ para 			echo 'Instalando virtualbox...'
 #el usuario podrá elegir el tipo de información que busca en particular.
 #No acepta argumentos de entrada.
 function f_vmsinfo {
-	cat ./info.txt
+	cat ./menus/info.txt
 	read opcion
 	while [[ $opcion != 16 ]]; do
 		if [[ $opcion = 1 ]]; then
@@ -178,7 +178,7 @@ function f_vmsinfo {
 		else
 			echo 'Error. Introduce una opción del menú.'
 		fi
-		cat ./info.txt
+		cat ./menus/info.txt
 	        read opcion
 	done
 }
@@ -294,6 +294,7 @@ function f_registrarvm {
 		echo 'Introduce la ruta absoluta de la máquina virtual:'
 		read vm
 		if [[ $(f_existe_directorio $vm;echo $?) = 0 ]]; then
+En determinadas opciones, devuelve los siguientes códigos:
 			vboxmanage registervm $vm
 			if [[ $(vboxmanage showvminfo $vm &> /dev/null;echo $?) = 0 ]]; then
 				echo 'Máquina registrada.'
@@ -320,7 +321,7 @@ function f_eliminar_registro_vm {
 	if [[ $(vboxmanage showvminfo $vm &> /dev/null; echo $?) = 1 ]]; then
 		echo 'No hay ninguna máquina virtual registrada con ese nombre.'
 	else
-		cat ./registros/elimreg.txt
+		cat ./menus/registros/elimreg.txt
 		read res
 		if [[ $res = 's' ]]; then
 			vboxmanage unregistervm $vm --delete &> /dev/null
@@ -380,7 +381,7 @@ function f_movervm {
 #- Fichero de icono: 0 si se ha cambiado y 1 si se ha introducido una ruta incorrecta.
 #- Directorio de instantáneas: 0 si se ha cambiado la ruta, 1 si no se ha podido cambiar y 2 si se ha introducido una ruta incorrecta.
 function f_config_general {
-	cat ./vmconfig/general.txt
+	cat ./menus/vmconfig/general.txt
 	read opcion
 	while [[ $opcion != 9 ]]; do
 		if [[ $opcion = 1 ]]; then
@@ -476,7 +477,7 @@ function f_config_general {
 				fi
 			fi
 		elif [[ $opcion = 7 ]]; then
-			cat ./vmconfig/clipdrag.txt
+			cat ./menus/vmconfig/clipdrag.txt
 			read opcion2
 			if [[ $opcion2 = 1 ]]; then
 				vboxmanage modifyvm $1 --clipboard disabled
@@ -488,7 +489,7 @@ function f_config_general {
 				vboxmanage modifyvm $1 --clipboard bidirectional
 			fi
 		elif [[ $opcion = 8 ]]; then
-			cat ./vmconfig/clipdrag.txt
+			cat ./menus/vmconfig/clipdrag.txt
 			read opcion2
 			if [[ $opcion2 = 1 ]]; then
                                 vboxmanage modifyvm $1 --draganddrop disabled
@@ -502,7 +503,505 @@ function f_config_general {
 		else
 			echo 'Opción incorrecta. Introduce una opción del menú.'
 		fi
-		cat ./vmconfig/general.txt
+		cat ./menus/vmconfig/general.txt
 		read opcion
+	done
+}
+
+#Esta función configura la pestaña de sistema de una máquina virtual en VirtualBox.
+#Las distintas opciones que aparecen en esta función se corresponden con las de los diferentes menús
+#invocados en el script, y cuyos ficheros de texto se encuentran en el directorio ./menus/.
+#Acepta como argumento el nombre de la máquina virtual.
+function f_config_sistema {
+	cat ./menus/vmconfig/sistema/sistema.txt
+	read opcion
+	while [[ $opcion != 10 ]]; do
+		if [[ $opcion = 1 ]]; then
+			echo 'Introduce el tamaño de memoria en MB (debe ser igual o mayor que 4):'
+			read size
+			vboxmanage modifyvm $1 --memory $size
+			if [[ $(vboxmanage showvminfo $1 | egrep Memory | awk '{print $3}' | egrep "$size") ]]; then
+				echo 'Memoria modificada.'
+			else
+				echo 'Error. Memoria no modificada.'
+			fi
+		elif [[ $opcion = 2 ]]; then
+			echo 'Introduce el orden (un número entre 1 y 4):'
+			read orden
+			if [[ $orden > 0 && $orden < 5 ]]; then
+				echo "¿Qué dispositivo quieres arrancar en $ordenº lugar?"
+				cat ./menus/vmconfig/sistema/orden_arranque.txt
+				read opcion2
+				if [[ $opcion2 = 1 ]]; then
+					vboxmanage modifyvm $1 --boot$orden disk
+					echo "Disco duro establecido en $ordenº lugar."
+				elif [[ $opcion2 = 2 ]]; then
+					vboxmanage modifyvm $1 --boot$orden dvd
+					echo "Óptica establecida en $ordenº lugar."
+				elif [[ $opcion2 = 3 ]]; then
+					vboxmanage modifyvm $1 --boot$orden net
+					echo "Red establecida en $ordenº lugar."
+				elif [[ $opcion2 = 4 ]]; then
+					vboxmanage modifyvm $1 --boot$orden floppy
+					echo "Disquete establecido en $ordenº lugar."
+				elif [[ $opcion2 = 5 ]]; then
+					vboxmanage modifyvm $1 --boot$orden none
+					echo "Ningún dispositivo establecido en $ordenº lugar"
+				else
+					echo 'Opción incorrecta.'
+				fi
+			else
+				echo 'Orden incorrecta.'
+			fi
+		elif [[ $opcion = 3 ]]; then
+			echo 'Selecciona un chipset de los siguientes:'
+			echo ''
+			echo '1) PIIX3'
+			echo '2) ICH9'
+			echo ''
+			echo 'Opción:'
+			read opcion2
+			if [[ $opcion2 = 1 ]]; then
+				vboxmanage modifyvm $1 --chipset piix3
+				echo 'Se ha seleccionado el chipset PIIX3.'
+			elif [[ $opcion2 = 2 ]]; then
+				vboxmanage modifyvm $1 --chipset ich9
+				echo 'Se ha seleccionado el chipset ICH9.'
+			else
+				echo 'Opción incorrecta.'
+			fi
+		elif [[ $opcion = 4 ]]; then
+			cat ./menus/vmconfig/sistema/apuntador.txt
+			read opcion2
+			if [[ $opcion2 = 1 ]]; then
+				vboxmanage modifyvm $1 --mouse ps2
+				echo 'Se ha seleccionado el ratón PS/2 como apuntador.'
+			elif [[ $opcion2 = 2 ]]; then
+				vboxmanage modifyvm $1 --mouse usb
+				echo 'Se ha seleccionado el ratón USB como apuntador.'
+			elif [[ $opcion2 = 3 ]]; then
+				vboxmanage modifyvm $1 --mouse usbtablet
+				echo 'Se ha seleccionado la tableta USB como apuntador.'
+			elif [[ $opcion2 = 4 ]]; then
+				vboxmanage modifyvm $1 --mouse usbmultitouch
+				echo 'Se ha seleccionado la tableta multitáctil USB como apuntador.'
+			else
+				echo 'Opción incorrecta.'
+			fi
+		elif [[ $opcion = 5 ]]; then
+			cat ./menus/vmconfig/sistema/placabase.txt
+			read opcion2
+			while [[ $opcion2 != 5 ]]; do
+				if [[ $opcion2 = 1 ]]; then
+					echo '(H)abilitar	(D)eshabilitar'
+					read opcion3
+					if [[ $opcion3 = 'H' ]]; then
+						vboxmanage modifyvm $1 --ioapic on
+						echo 'I/O APIC habilitado.'
+					elif [[ $opcion3 = 'D' ]]; then
+						vboxmanage modifyvm $1 --ioapic off
+						echo 'I/O APIC deshabilitado.'
+					else
+						echo 'Opción incorrecta.'
+					fi
+				elif [[ $opcion2 = 2 ]]; then
+					echo '(H)abilitar       (D)eshabilitar'
+					read opcion3
+					if [[ $opcion3 = 'H' ]]; then
+                                                vboxmanage modifyvm $1 --acpi on
+                                                echo 'ACPI habilitado.'
+                                        elif [[ $opcion3 = 'D' ]]; then
+                                                vboxmanage modifyvm $1 --acpi off
+                                                echo 'ACPI deshabilitado.'
+                                        else
+                                                echo 'Opción incorrecta.'
+					fi
+				elif [[ $opcion2 = 3 ]]; then
+					echo '(H)abilitar       (D)eshabilitar'
+					read opcion3
+                                        if [[ $opcion3 = 'H' ]]; then
+                                                vboxmanage modifyvm $1 --firmware efi
+                                                echo 'ACPI habilitado.'
+                                        elif [[ $opcion3 = 'D' ]]; then
+                                                vboxmanage modifyvm $1 --firmware bios
+                                                echo 'ACPI deshabilitado.'
+                                        else
+                                                echo 'Opción incorrecta.'
+                                        fi
+				elif [[ $opcion2 = 4 ]]; then
+					echo '¿Quieres establecer el reloj en tiempo UTC? (s/n)'
+					read opcion3
+					if [[ $opcion3 = 's' ]]; then
+						vboxmanage modifyvm $1 --rtcuseutc on
+						echo 'Reloj establecido en UTC.'
+					elif [[ $opcion3 = 'n' ]]; then
+						vboxmanage modifyvm $1 --rtcuseutc off
+						echo 'Reloj no establecido en UTC.'
+					else
+						echo 'Opción incorrecta.'
+					fi
+				else
+					echo 'Opción incorrecta.'
+				fi
+				cat ./menus/vmconfig/sistema/placabase.txt
+				read opcion2
+			done
+		elif [[ $opcion = 6 ]]; then
+			echo '¿Cuántos núcleos del procesador físico quieres que use la máquina?'
+			read numproc
+			if [[ $numproc < $(cat /proc/cpuinfo | egrep processor | wc -l) || $numproc = $(cat /proc/cpuinfo | egrep processor | wc -l) ]]; then
+				vboxmanage modifyvm $1 --cpus $numproc
+				if [[ $(vboxmanage showvminfo $1 | egrep CPUs | awk '{print $4}') = $numproc ]]; then
+					echo "Número de CPUs establecido: $numproc"
+				else
+					echo 'Error. El número de CPUs no se ha modificado.'
+				fi
+			else
+				echo 'Error. El número de CPUs introducido sobrepasa la cantidad permitida.'
+			fi
+		elif [[ $opcion = 7 ]]; then
+			echo 'Introduce el porcentaje de ejecución del procesador físico para tareas de virtualización (1-100):'
+			read porcentaje
+			if [[ $porcentaje > 0 && $porcentaje < 101 ]]; then
+				vboxmanage modifyvm $1 --cpuexecutioncap $porcentaje
+				if [[ $(vboxmanage showvminfo $1 | egrep exec | awk '{print $4}') = "$porcentaje%" ]]; then
+					echo 'Límite de ejecución modificado.'
+				else
+					echo 'Error. Límite de ejecución no modificado.'
+				fi
+			else
+				echo 'Respuesta no válida.'
+			fi
+		elif [[ $opcion = 8 ]]; then
+			cat ./menus/vmconfig/sistema/procesador.txt
+			read opcion2
+			while [[ $opcion2 != 3 ]]; do
+				if [[ $opcion2 = 1 ]]; then
+					echo '¿Quieres habilitar PAE? (s/n)'
+					read opcion3
+					if [[ $opcion3 = 's' ]]; then
+						vboxmanage modifyvm $1 --pae on
+						echo 'PAE habilitado.'
+					elif [[ $opcion3 = 'n' ]]; then
+						vboxmanage modifyvm $1 --pae off
+						echo 'PAE deshabilitado.'
+					else
+						echo 'Opción incorrecta.'
+					fi
+				elif [[ $opcion2 = 2 ]]; then
+					echo '¿Quieres habilitar las extensiones de virtualización VT-x/AMD-V anidado?'
+					read opcion3
+					if [[ $opcion3 = 's' ]]; then
+						vboxmanage modifyvm $1 --hwvirtex on
+                                                echo 'VT-x/AMD-V anidado habilitado.'
+                                        elif [[ $opcion3 = 'n' ]]; then
+                                                vboxmanage modifyvm $1 --hwvirtex off
+                                                echo 'VT-x/AMD-V anidado deshabilitado.'
+                                        else
+                                                echo 'Opción incorrecta.'
+                                        fi
+				else
+					echo 'Opción incorrecta.'
+				fi
+			cat ./menus/vmconfig/sistema/procesador.txt
+                        read opcion2
+			done
+		elif [[ $opcion = 9 ]]; then
+			cat ./menus/vmconfig/sistema/aceleracion.txt
+			read opcion2
+			while [[ $opcion2 != 3 ]]; do
+				if [[ $opcion2 = 1 ]]; then
+					cat ./menus/vmconfig/sistema/intparavt.txt
+					read opcion3
+					if [[ $opcion3 = 1 ]]; then
+						vboxmanage modifyvm $1 --paravirtprovider none
+						echo 'Interfaz deshabilitada.'
+					elif [[ $opcion3 = 2 ]]; then
+						vboxmanage modifyvm $1 --paravirtprovider default
+						echo 'Interfaz seleccionada: determinada.'
+					elif [[ $opcion3 = 3 ]]; then
+						vboxmanage modifyvm $1 --paravirtprovider legacy
+						echo 'Interfaz seleccionada: heredada.'
+					elif [[ $opcion3 = 4 ]]; then
+						vboxmanage modifyvm $1 --paravirtprovider minimal
+						echo 'Interfaz seleccionada: mínima.'
+					elif [[ $opcion3 = 5 ]]; then
+						vboxmanage modifyvm $1 --paravirtprovider hyperv
+						echo 'Interfaz seleccionada: Hyper-V.'
+					elif [[ $opcion3 = 6 ]]; then
+						vboxmanage modifyvm $1 --paravirtprovider kvm
+						echo 'Interfaz seleccionada: KVM.'
+					else
+						echo 'Opción incorrecta.'
+					fi
+				elif [[ $opcion2 = 2 ]]; then
+					echo '¿Quieres habilitar la paginación anidada? (s/n)'
+					read opcion3
+					if [[ $opcion3 = 's' ]]; then
+						vboxmanage modifyvm $1 --nestedpaging on
+						echo 'Paginación anidada habilitada.'
+					elif [[ $opcion3 = 'n' ]]; then
+						vboxmanage modifyvm $1 --nestedpaging off
+						echo 'Paginación anidada deshabilitada.'
+					else
+						echo 'Opción incorrecta.'
+					fi
+				else
+					echo 'Opción incorrecta.'
+				fi
+			cat ./menus/vmconfig/sistema/aceleracion.txt
+			read opcion2
+			done
+		else
+			echo 'Opción incorrecta.'
+		fi
+		cat ./menus/vmconfig/sistema/sistema.txt
+		read opcion
+	done
+}
+
+#Esta función permite configurar las distintas opciones que se ven en la pestaña Pantalla
+#de la ventana de configuración de una máquina virtual en VirtualBox.
+#Acepta como argumento de entrada el nombre de la máquina virtual.
+function f_config_pantalla {
+	cat ./menus/vmconfig/pantalla/pantalla.txt
+	read opcion
+	while [[ $opcion != 7 ]]; do
+		if [[ $opcion = 1 ]]; then
+			echo 'Introduce el tamaño de memoria de vídeo en MB:'
+			read size
+			vboxmanage modifyvm $1 --vram $size
+			if [[ $(vboxmanage showvminfo $1 | egrep VRAM | egrep $size) ]]; then
+				echo 'Tamaño de memoria de vídeo modificado.'
+			else
+				echo 'Error. Tamaño no modificado.'
+			fi
+		elif [[ $opcion = 2 ]]; then
+			echo 'Introduce el número de monitores que quieres asignar a la máquina:'
+			read num
+			vboxmanage modifyvm $1 --monitorcount $num
+			if [[ $(vboxmanage showvminfo $1 | egrep Monitor | awk '{print $3}') = $num ]]; then
+				echo 'Número de monitores modificado.'
+			else
+				echo 'Error. Número de monitores no modificado.'
+			fi
+		elif [[ $opcion = 3 ]]; then
+			cat ./menus/vmconfig/pantalla/controlador.txt
+			read opcion2
+			if [[ $opcion2 = 1 ]]; then
+				vboxmanage modifyvm $1 --graphicscontroller none
+				echo 'Controlador seleccionado: ninguno'
+			elif [[ $opcion2 = 2 ]]; then
+				vboxmanage modifyvm $1 --graphicscontroller vboxvga
+				echo 'Controlador seleccionado: VBoxVGA'
+			elif [[ $opcion2 = 3 ]]; then
+				vboxmanage modifyvm $1 --graphicscontroller vmsvga
+				echo 'Controlador seleccionado: VMSVGA'
+			elif [[ $opcion2 = 4 ]]; then
+				vboxmanage modifyvm $1 --graphicscontroller vboxsvga
+				echo 'Controlador seleccionado: VBoxSVGA'
+			else
+				echo 'Opción incorrecta.'
+			fi
+		elif [[ $opcion = 4 ]]; then
+			echo '¿Quieres habilitar la aceleración 3D? (s/n)'
+			read opcion2
+			if [[ $opcion2 = 's' ]]; then
+				vboxmanage modifyvm $1 --accelerate3d on
+				echo 'Aceleración 3D habilitada.'
+			elif [[ $opcion2 = 'n' ]]; then
+				vboxmanage modifyvm $1 --accelerate3d off
+				echo 'Aceleración 3D deshabilitada.'
+			fi
+		elif [[ $opcion = 5 ]]; then
+			echo '¿Quieres tener habilitada la pantalla remota? (s/n)'
+			read res1
+			if [[ $res1 = 's' ]]; then
+				vboxmanage modifyvm $1 --vrde on
+				echo 'Pantalla remota habilitada.'
+				echo '¿Quieres modificar las opciones de pantalla remota? (s/n)'
+				read res2
+				if [[ $res2 = 's' ]]; then
+					cat ./menus/vmconfig/pantalla/remota.txt
+					read opcion2
+					while [[ $opcion2 != 5 ]]; do
+						if [[ $opcion2 = 1 ]]; then
+							echo '¿Quieres que el puerto sea el predeterminado (3389)? (s/n)'
+							read res3
+							if [[ $res3 = 's' ]]; then
+								vboxmanage modifyvm $1 --vrdeport default
+								echo 'Puerto seleccionado: 3389'
+							elif [[ $res3 = 'n' ]]; then
+								echo 'Introduce el número de puerto:'
+								read puerto
+								vboxmanage modifyvm $1 --vrdeport $puerto
+								if [[ $(vboxmanage showvminfo $1 | egrep 'Teleporter Port' | awk '{print $3}') = $puerto ]]; then
+									echo "Puerto establecido: $puerto"
+								else
+									echo 'Error. Puerto no establecido.'
+								fi
+							fi
+						elif [[ $opcion2 = 2 ]]; then
+							echo '¿IPv4, IPv6 o ambos? (4/6)'
+							read res3
+							if [[ $res3 = 4 ]]; then
+								echo 'Introduce una dirección IPv4 (por defecto, 0.0.0.0):'
+								read ip
+								if [[ $ip = $null ]]; then
+									vboxmanage modifyvm $1 --vrdeaddress "0.0.0.0"
+									echo 'Se ha establecido la IPv4 por defecto.'
+								else
+									vboxmanage modifyvm $1 --vrdeaddress $ip
+									if [[ $(vboxmanage showvminfo $1 | egrep 'Teleporter Address' | awk '{print $3}') = $ip ]]; then
+										echo "Dirección IPv4 establecida: $ip"
+									else
+										echo 'Error. Dirección IP no establecida.'
+									fi
+								fi
+							elif [[ $res3 = 6 ]]; then
+								echo 'Introduce una dirección IPv6 (por defecto, ::):'
+                                                                read ip
+                                                                if [[ $ip = $null ]]; then
+                                                                        vboxmanage modifyvm $1 --vrdeaddress "::"
+                                                                        echo 'Se ha establecido la IPv6 por defecto.'
+                                                                else
+                                                                        vboxmanage modifyvm $1 --vrdeaddress $ip
+                                                                        if [[ $(vboxmanage showvminfo $1 | egrep 'Teleporter Address' | awk '{print $3}') = $ip ]]; then
+                                                                                echo "Dirección IPv6 establecida: $ip"
+                                                                        else
+                                                                                echo 'Error. Dirección IP no establecida.'
+                                                                        fi
+                                                                fi
+							fi
+						elif [[ $opcion2 = 3 ]]; then
+							cat ./menus/vmconfig/pantalla/rvauth.txt
+							read opcion3
+							if [[ $opcion3 = 1 ]]; then
+								vboxmanage modifyvm $1 --vrdeauthtype null
+								echo 'Tipo de autenticación seleccionada: nulo'
+							elif [[ $opcion3 = 2 ]]; then
+								vboxmanage modifyvm $1 --vrdeauthtype external
+								echo 'Tipo de autenticación seleccionada: externo'
+							elif [[ $opcion3 = 3 ]]; then
+								vboxmanage modifyvm $1 --vrdeauthtype guest
+								echo 'Tipo de autenticación seleccionada: invitado'
+							else
+								echo 'Opción incorrecta.'
+							fi
+						elif [[ $opcion2 = 4 ]]; then
+							echo '¿Quieres permitir múltiples conexiones? (s/n)'
+							read res3
+							if [[ $res3 = 's' ]]; then
+								vboxmanage modifyvm $1 --vrdemulticon on
+								echo 'Ahora se permiten múltiples conexiones.'
+							elif [[ $res3 = 'n' ]]; then
+								vboxmanage modifyvm $1 --vrdemulticon off
+								echo 'Ahora no se permiten múltiples conexiones.'
+							fi
+						else
+							echo 'Opción incorrecta.'
+						fi
+						cat ./menus/vmconfig/pantalla/remota.txt
+                                	        read opcion2
+					done
+				fi
+			elif [[ $res1 = 'n' ]]; then
+				vboxmanage modifyvm $1 --vrde off
+				echo 'Pantalla remota deshabilitada.'
+			fi
+		elif [[ $opcion = 6 ]]; then
+			echo '¿Quieres tener habilitada la grabación de sesiones en la máquina?'
+			read res1
+			if [[ $res1 = 's' ]]; then
+				vboxmanage modifyvm $1 --recording on
+				echo 'Grabación habilitada.'
+				echo '¿Quieres modificar las opciones de grabación? (s/n)'
+				read res2
+				if [[ $res2 = 's' ]]; then
+					cat ./menus/vmconfig/pantalla/grabacion.txt
+					read opcion2
+					while [[ $opcion2 != 8 ]]; do
+						if [[ $opcion2 = 1 ]]; then
+							echo '¿Quieres grabar todas las pantallas o solo una? (1/n)'
+							read res3
+							if [[ $res3 = 1 ]]; then
+								echo 'Introduce el identificador de la pantalla:'
+								read pantalla
+								vboxmanage modifyvm $1 --recordingscreens $pantalla
+								echo "Pantalla seleccionada: $pantalla"
+							elif [[ $res3 = 'n' ]]; then
+								vboxmanage modifyvm $1 --recordingscreens all
+								echo 'Se han seleccionado todas las pantallas.'
+							fi
+						elif [[ $opcion2 = 2 ]]; then
+							echo "Introduce la ruta del archivo de grabación (por defecto, ~/VirtualBox VMs/$1/):"
+							read ruta
+							if [[ $ruta = $null ]]; then
+								ruta="/home/$USER/VirtualBox\ VMs/$1/"
+							fi
+							if [[ -e "$ruta" ]]; then
+								vboxmanage modifyvm $1 --recordingfile "$ruta"
+								if [[ $(vboxmanage showvminfo prueba | egrep 'Capture file' | egrep "$ruta") ]]; then
+									echo 'Ruta modificada.'
+								else
+									echo 'Error. Ruta no modificada.'
+								fi
+							else
+								echo 'Ruta no encontrada.'
+							fi
+						elif [[ $opcion2 = 3 ]]; then
+							echo 'Introduce el tamaño máximo del archivo en MB:'
+							read size
+							vboxmanage modifyvm $1 --recordingmaxsize $size
+							echo "Tamaño máximo establecido: $size"
+						elif [[ $opcion2 = 4 ]]; then
+							echo 'Introduce el tiempo máximo de grabación en segundos:'
+							read segundos
+							vboxmanage modifyvm $1 --recordingmaxtime $tiempo
+							if [[ $tiempo > 3600 ]]; then
+								let minutos=$tiempo/60
+								let segundos=$tiempo%60
+							echo "Tiempo máximo de grabación: $minutos minutos y $segundos segundos."
+							elif [[ $tiempo > 60 ]]; then
+								let horas=$tiempo/3600
+								let segundos=$tiempo%3600
+								if [[ $segundos > 60 ]]; then
+									let minutos=$segundos/60
+                                                               		let segundos=$segundos%60
+									echo "Tiempo máximo de grabación: $horas horas, $minutos minutos y $segundos segundos."
+								else
+									echo "Tiempo máximo de grabación: $horas horas y $segundos segundos."
+								fi
+							else
+								echo "Tiempo máximo de grabación: $tiempo segundos."
+							fi
+						elif [[ $opcion2 = 5 ]]; then
+							echo 'Introduce un número máximo de fps:'
+							read fps
+							vboxmanage modifyvm $1 --recordingvideofps $fps
+							echo "Número máximo de fps establecido: $fps"
+						elif [[ $opcion2 = 6 ]]; then
+							echo 'Introduce una tasa de bits por segundo en kilobits:'
+							read kb
+							vboxmanage modifyvm $1 --recordingvideorate $kb
+							echo "Tasa establecida: $kb kilobits"
+						elif [[ $opcion2 = 7 ]]; then
+							
+						else
+							echo 'Opción incorrecta.'
+						fi
+						cat ./menus/vmconfig/pantalla/grabacion.txt
+	                                        read opcion2
+					done
+				fi
+			elif [[ $res1 = 'n' ]]; then
+				vboxmanage modifyvm $1 --recording off
+				echo 'Grabación deshabilitada.'
+			fi
+		else
+			echo 'Opción incorrecta.'
+		fi
+		cat ./menus/vmconfig/pantalla/pantalla.txt
+        	read opcion
 	done
 }

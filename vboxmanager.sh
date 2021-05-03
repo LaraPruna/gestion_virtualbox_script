@@ -1,7 +1,7 @@
 #!/bin/bash
 
 . ./libreria.sh
-
+set -x
 echo 'Inicio del programa. Comprobando el estado del paquete virtualbox...'
 if [[ $(f_esta_instalado virtualbox;echo $?) = 1 ]]; then
 	echo 'No tienes instalado Virtualbox. ¿Quieres instalarlo? (s/n)'
@@ -22,7 +22,7 @@ fi
 if [[ $(f_eres_root;echo $?) = 0 ]]; then
         echo 'Se recomienda entrar como usuario en este programa.'
 fi
-cat ./menu.txt
+cat ./menus/mainmenu.txt
 read opcion
 while [[ $opcion != 14 ]]; do
 	if [[ $opcion = 1 ]]; then
@@ -34,7 +34,7 @@ while [[ $opcion != 14 ]]; do
 	elif [[ $opcion = 3 ]]; then
 		f_crearvm
 	elif [[ $opcion = 4 ]]; then
-		cat ./registros/registros.txt
+		cat ./menus/registros/registros.txt
 		read opcion2
 		while [[ $opcion2 != 3 ]]; do
 			if [[ $opcion2 = 1 ]]; then
@@ -44,7 +44,7 @@ while [[ $opcion != 14 ]]; do
 			else
 				echo 'Opción incorrecta.'
 			fi
-			cat ./registros/registros.txt
+			cat ./menus/registros/registros.txt
                 	read opcion2
 		done
 	elif [[ $opcion = 5 ]]; then
@@ -53,13 +53,19 @@ while [[ $opcion != 14 ]]; do
 		echo 'Introduce el nombre de la máquina virtual que quieres configurar:'
 		read vm
 		if [[ $(vboxmanage showvminfo $vm &> /dev/null;echo $?) = 0 ]]; then
-			cat ./vmconfig/vmconfig.txt
+			cat ./menus/vmconfig/vmconfig.txt
 			read opcion2
 			while [[ $opcion2 != 10 ]]; do
 				if [[ $opcion2 = 1 ]]; then
 					f_config_general $vm
+				elif [[ $opcion2 = 2 ]]; then
+					f_config_sistema $vm
+				elif [[ $opcion2 = 3 ]]; then
+					f_config_pantalla $vm
+				else
+					echo 'Opción incorrecta.'
 				fi
-				cat ./vmconfig/vmconfig.txt
+				cat ./menus/vmconfig/vmconfig.txt
 	                        read opcion2
 			done
 		else
@@ -68,6 +74,6 @@ while [[ $opcion != 14 ]]; do
 	else
 		echo 'Error. Introduce una opción del menú.'
 	fi
-	cat ./menu.txt
+	cat ./menus/mainmenu.txt
 	read opcion
 done
