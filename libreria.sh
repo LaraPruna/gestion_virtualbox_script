@@ -24,6 +24,18 @@ function f_existe_directorio {
         fi
 }
 
+#Mediante esta función, comprobamos la existencia de un directorio.
+#Devuelve un 0 si el directorio existe y 1 si no existe.
+#Acepta un argumento, que es el directorio que se quiera comprobar.
+function f_existe_fichero {
+        if [[ -e $1 ]]
+                then
+                        return 0
+                else
+                        return 1
+        fi
+}
+
 #Esta función comprueba si un paquete está instalado o no.
 #Acepta como argumento el nombre del paquete.
 #Devuelve 0 si está instalado y 1 si no lo está.
@@ -761,7 +773,8 @@ function f_config_sistema {
 }
 
 #Esta función permite configurar las distintas opciones que se ven en la pestaña Pantalla
-#de la ventana de configuración de una máquina virtual en VirtualBox.
+#de la ventana de configuración de una máquina virtual en VirtualBox. Para ello, se toma como refencia
+#los diferentes menús alojados en ./menus/pantalla/.
 #Acepta como argumento de entrada el nombre de la máquina virtual.
 function f_config_pantalla {
 	cat ./menus/vmconfig/pantalla/pantalla.txt
@@ -835,7 +848,7 @@ function f_config_pantalla {
 								echo 'Introduce el número de puerto:'
 								read puerto
 								vboxmanage modifyvm $1 --vrdeport $puerto
-								if [[ $(vboxmanage showvminfo $1 | egrep 'Teleporter Port' | awk '{print $3}') = $puerto ]]; then
+								if [[ $(vboxmanage showvminfo $1 | egrep 'VRDE' | awk '{print $5}') = $puerto ]]; then
 									echo "Puerto establecido: $puerto"
 								else
 									echo 'Error. Puerto no establecido.'
@@ -852,7 +865,7 @@ function f_config_pantalla {
 									echo 'Se ha establecido la IPv4 por defecto.'
 								else
 									vboxmanage modifyvm $1 --vrdeaddress $ip
-									if [[ $(vboxmanage showvminfo $1 | egrep 'Teleporter Address' | awk '{print $3}') = $ip ]]; then
+									if [[ $(vboxmanage showvminfo $1 | egrep 'VRDE' | awk '{print $4}') = "$ip," ]]; then
 										echo "Dirección IPv4 establecida: $ip"
 									else
 										echo 'Error. Dirección IP no establecida.'
@@ -866,7 +879,7 @@ function f_config_pantalla {
                                                                         echo 'Se ha establecido la IPv6 por defecto.'
                                                                 else
                                                                         vboxmanage modifyvm $1 --vrdeaddress $ip
-                                                                        if [[ $(vboxmanage showvminfo $1 | egrep 'Teleporter Address' | awk '{print $3}') = $ip ]]; then
+                                                                        if [[ $(vboxmanage showvminfo $1 | egrep 'VRDE' | awk '{print $4}') = "$ip," ]]; then
                                                                                 echo "Dirección IPv6 establecida: $ip"
                                                                         else
                                                                                 echo 'Error. Dirección IP no establecida.'
@@ -910,7 +923,7 @@ function f_config_pantalla {
 				echo 'Pantalla remota deshabilitada.'
 			fi
 		elif [[ $opcion = 6 ]]; then
-			echo '¿Quieres tener habilitada la grabación de sesiones en la máquina?'
+			echo '¿Quieres tener habilitada la grabación de sesiones en la máquina? (s/n)'
 			read res1
 			if [[ $res1 = 's' ]]; then
 				vboxmanage modifyvm $1 --recording on
@@ -934,10 +947,10 @@ function f_config_pantalla {
 								echo 'Se han seleccionado todas las pantallas.'
 							fi
 						elif [[ $opcion2 = 2 ]]; then
-							echo "Introduce la ruta del archivo de grabación (por defecto, ~/VirtualBox VMs/$1/):"
+							echo "Introduce la ruta del archivo de grabación (por defecto, ~/VirtualBox VMs/$1/$1.webm):"
 							read ruta
 							if [[ $ruta = $null ]]; then
-								ruta="/home/$USER/VirtualBox\ VMs/$1/"
+								ruta="/home/$USER/VirtualBox\ VMs/$1/$1.webm"
 							fi
 							if [[ -e "$ruta" ]]; then
 								vboxmanage modifyvm $1 --recordingfile "$ruta"
@@ -986,7 +999,16 @@ function f_config_pantalla {
 							vboxmanage modifyvm $1 --recordingvideorate $kb
 							echo "Tasa establecida: $kb kilobits"
 						elif [[ $opcion2 = 7 ]]; then
-							
+							echo 'Introduce la anchura en píxeles:'
+							read anchura
+							echo 'Introduce la altura en píxeles:'
+							read altura
+							vboxmanage modifyvm $1 --recordingvideores "$anchurax$altura"
+							if [[ $(vboxmanage showvminfo prueba | egrep 'Capture dimensions' | awk '{print $3}') = "$anchurax$altura" ]]; then
+								echo 'Resolución cambiada correctamente.'
+							else
+								echo 'Error. Resolución no modificada.'
+							fi
 						else
 							echo 'Opción incorrecta.'
 						fi
