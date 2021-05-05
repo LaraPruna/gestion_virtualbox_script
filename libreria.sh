@@ -24,18 +24,6 @@ function f_existe_directorio {
         fi
 }
 
-#Mediante esta función, comprobamos la existencia de un directorio.
-#Devuelve un 0 si el directorio existe y 1 si no existe.
-#Acepta un argumento, que es el directorio que se quiera comprobar.
-function f_existe_fichero {
-        if [[ -e $1 ]]
-                then
-                        return 0
-                else
-                        return 1
-        fi
-}
-
 #Esta función comprueba si un paquete está instalado o no.
 #Acepta como argumento el nombre del paquete.
 #Devuelve 0 si está instalado y 1 si no lo está.
@@ -947,46 +935,51 @@ function f_config_pantalla {
 								echo 'Se han seleccionado todas las pantallas.'
 							fi
 						elif [[ $opcion2 = 2 ]]; then
-							echo "Introduce la ruta del archivo de grabación (por defecto, ~/VirtualBox VMs/$1/$1.webm):"
+							echo "Introduce la ruta del archivo de grabación (por defecto, ~/VirtualBox VMs/$1/):"
 							read ruta
 							if [[ $ruta = $null ]]; then
-								ruta="/home/$USER/VirtualBox\ VMs/$1/$1.webm"
-							fi
-							if [[ -e "$ruta" ]]; then
-								vboxmanage modifyvm $1 --recordingfile "$ruta"
-								if [[ $(vboxmanage showvminfo prueba | egrep 'Capture file' | egrep "$ruta") ]]; then
-									echo 'Ruta modificada.'
-								else
-									echo 'Error. Ruta no modificada.'
-								fi
+								ruta="/home/$USER/VirtualBox VMs/$1"
+								vboxmanage modifyvm $1 --recordingfile "$ruta/$1.webm"
+                                                                        if [[ $(vboxmanage showvminfo $1 | egrep 'Capture file' | egrep "$ruta") ]]; then
+                                                                                echo 'Ruta modificada.'
+                                                                        else
+                                                                                echo 'Error. Ruta no modificada.'
+                                                                        fi
 							else
-								echo 'Ruta no encontrada.'
+								if [[ $(f_existe_directorio "$ruta";echo $?) = 0 ]]; then
+									vboxmanage modifyvm $1 --recordingfile "$ruta/$1.webm"
+									if [[ $(vboxmanage showvminfo $1 | egrep 'Capture file' | egrep "$ruta") ]]; then
+										echo 'Ruta modificada.'
+									else
+										echo 'Error. Ruta no modificada.'
+									fi
+								else
+									echo 'Ruta no encontrada.'
+								fi
 							fi
 						elif [[ $opcion2 = 3 ]]; then
 							echo 'Introduce el tamaño máximo del archivo en MB:'
 							read size
 							vboxmanage modifyvm $1 --recordingmaxsize $size
-							echo "Tamaño máximo establecido: $size"
+							echo "Tamaño máximo establecido: $sizeMB"
 						elif [[ $opcion2 = 4 ]]; then
 							echo 'Introduce el tiempo máximo de grabación en segundos:'
-							read segundos
+							read tiempo
 							vboxmanage modifyvm $1 --recordingmaxtime $tiempo
-							if [[ $tiempo > 3600 ]]; then
+							if [[ $tiempo -gt 3600 || $tiempo = 3600 ]]; then
+								let horas=$tiempo/3600
+                                                                let segundos=$tiempo%3600
+                                                                if [[ $segundos -gt 60 || $segundos = 60 ]]; then
+                                                                        let minutos=$segundos/60
+                                                                        let segundos=$segundos%60
+                                                                        echo "Tiempo máximo de grabación: $horas hora(s), $minutos minuto(s) y $segundos segundo(s)."
+                                                                else
+                                                                        echo "Tiempo máximo de grabación: $horas hora(s) y $segundos segundo(s)."
+                                                                fi
+							elif [[ $tiempo -gt 60 || $tiempo = 60 ]]; then
 								let minutos=$tiempo/60
 								let segundos=$tiempo%60
-							echo "Tiempo máximo de grabación: $minutos minutos y $segundos segundos."
-							elif [[ $tiempo > 60 ]]; then
-								let horas=$tiempo/3600
-								let segundos=$tiempo%3600
-								if [[ $segundos > 60 ]]; then
-									let minutos=$segundos/60
-                                                               		let segundos=$segundos%60
-									echo "Tiempo máximo de grabación: $horas horas, $minutos minutos y $segundos segundos."
-								else
-									echo "Tiempo máximo de grabación: $horas horas y $segundos segundos."
-								fi
-							else
-								echo "Tiempo máximo de grabación: $tiempo segundos."
+								echo "Tiempo máximo de grabación: $minutos minuto(s) y $segundos segundo(s)."
 							fi
 						elif [[ $opcion2 = 5 ]]; then
 							echo 'Introduce un número máximo de fps:'
@@ -1003,8 +996,8 @@ function f_config_pantalla {
 							read anchura
 							echo 'Introduce la altura en píxeles:'
 							read altura
-							vboxmanage modifyvm $1 --recordingvideores "$anchurax$altura"
-							if [[ $(vboxmanage showvminfo prueba | egrep 'Capture dimensions' | awk '{print $3}') = "$anchurax$altura" ]]; then
+							vboxmanage modifyvm $1 --recordingvideores "$anchura"x"$altura"
+							if [[ $(vboxmanage showvminfo prueba | egrep 'Capture dimensions' | egrep "$anchura"x"$altura") ]]; then
 								echo 'Resolución cambiada correctamente.'
 							else
 								echo 'Error. Resolución no modificada.'
