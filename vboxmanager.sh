@@ -2,7 +2,6 @@
 
 . ./libreria.sh
 
-set -x
 echo 'Inicio del programa. Comprobando el estado del paquete virtualbox...'
 if [[ $(f_esta_instalado virtualbox;echo $?) = 1 ]]; then
 	echo 'No tienes instalado Virtualbox. ¿Quieres instalarlo? (s/n)'
@@ -63,6 +62,8 @@ while [[ $opcion != 14 ]]; do
 					f_config_sistema $vm
 				elif [[ $opcion2 = 3 ]]; then
 					f_config_pantalla $vm
+				elif [[ $opcion2 = 4 ]]; then
+					f_config_almacenamiento $vm
 				else
 					echo 'Opción incorrecta.'
 				fi

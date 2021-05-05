@@ -761,7 +761,7 @@ function f_config_sistema {
 }
 
 #Esta función permite configurar las distintas opciones que se ven en la pestaña Pantalla
-#de la ventana de configuración de una máquina virtual en VirtualBox. Para ello, se toma como refencia
+#de la ventana de configuración de una máquina virtual en VirtualBox. Para ello, se toma como referencia
 #los diferentes menús alojados en ./menus/pantalla/.
 #Acepta como argumento de entrada el nombre de la máquina virtual.
 function f_config_pantalla {
@@ -1018,5 +1018,171 @@ function f_config_pantalla {
 		fi
 		cat ./menus/vmconfig/pantalla/pantalla.txt
         	read opcion
+	done
+}
+
+#Esta función añade un nuevo controlador de almacenamiento a una determinada máquina virtual en Virtualbox.
+#En el programa vboxmanager.sh, se emplea como parte de la función de configuración de almacenamiento (f_config_almacenamiento).
+#Acepta como argumento de entrada el nombre o la UUID de la máquina virtual.
+function f_añadecontrolador {
+	echo '¿Qué nombre quieres darle al nuevo controlador?'
+	read nombre
+	cat ./menus/vmconfig/almacenamiento/busessistema.txt
+	read opcion
+	while [[ $opcion < 1 || $opcion > 7 ]]; do
+		echo 'Opción incorrecta.'
+	        cat ./menus/vmconfig/almacenamiento/busessistema.txt
+        	read opcion2
+	done
+	if [[ $opcion = 1 ]]; then
+		bus="ide"
+	elif [[ $opcion = 2 ]]; then
+        	bus="sata"
+	elif [[ $opcion = 3 ]]; then
+        	bus="scsi"
+	elif [[ $opcion = 4 ]]; then
+        	bus="floppy"
+	elif [[ $opcion = 5 ]]; then
+	        bus="sas"
+	elif [[ $opcion = 6 ]]; then
+		bus="usb"
+	else
+	        bus="pcie"
+	fi
+	chipset=false
+	echo '¿Quieres elegir un chipset en particular? (s/n)'
+	read res
+	if [[ $res = 's' ]]; then
+		chipset=true
+	        cat ./menus/vmconfig/almacenamiento/chipsets.txt
+	        read opcion2
+	        if [[ $opcion2 = 1 ]]; then
+	        	tipo="PIIX4"
+	        elif [[ $opcion2 = 2 ]]; then
+	                tipo="PIIX3"
+	        elif [[ $opcion2 = 3 ]]; then
+	                tipo="ICH6"
+	        elif [[ $opcion2 = 4 ]]; then
+	                tipo="IntelAhci"
+	        elif [[ $opcion2 = 5 ]]; then
+	                tipo="LSILogic"
+	        elif [[ $opcion2 = 6 ]]; then
+	                tipo="BusLogic"
+		elif [[ $opcion2 = 7 ]]; then
+	                tipo="I82078"
+	        elif [[ $opcion2 = 8 ]]; then
+	                tipo="LSILogic SAS"
+	        elif [[ $opcion2 = 9 ]]; then
+	                tipo="USB"
+	        elif [[ $opcion2 = 10 ]]; then
+	                tipo="NVMe"
+	        elif [[ $opcion2 = 11 ]]; then
+	                tipo="VirtIO"
+	        else
+	                echo 'Opción incorrecta.'
+	        fi
+	fi
+	numpuertos=false
+	if [[ $opcion = 2 || $opcion = 5 ]]; then
+		echo '¿Quieres especificar una cantidad de puertos? (s/n)'
+		read res
+		if [[ $res = 's' ]]; then
+			numpuertos=true
+	        	echo 'Introduce una cantidad entre 1 y 30:'
+		        read num
+	        	while [[ $num -lt 1 || $num -gt 30 ]]; do
+	        		echo 'Cantidad incorrecta.'
+				echo 'Introduce una cantidad entre 1 y 30:'
+	                	read num
+	        	done
+		fi
+	fi
+	cache=false
+	echo '¿Quieres usar la caché de E/S del anfitrión? (s/n)'
+	read res
+	if [[ $res = 's' ]]; then
+		cache=true
+	fi
+	arrancable=false
+	echo '¿Quieres que sea arrancable?'
+	read res
+	if [[ $res = 's' ]]; then
+		arrancable=true
+	fi
+	if [[ $chipset ]]; then
+		if [[ $numpuertos ]]; then
+	        	if [[ $cache ]]; then
+	                	if [[ $arrancable ]]; then
+	                        	vboxmanage storagectl $1 --name $nombre --add $bus --controller $tipo --portcount $num --hostiocache on --bootable on
+        	                else
+                	                vboxmanage storagectl $1 --name $nombre --add $bus --controller $tipo --portcount $num --hostiocache on
+                        	fi
+	                else
+				if [[ $arrancable ]]; then
+	                                vboxmanage storagectl $1 --name $nombre --add $bus --controller $tipo --portcount $num --bootable on
+	                        else
+	                        	vboxmanage storagectl $1 --name $nombre --add $bus --controller $tipo --portcount $num
+	                        fi
+	                fi
+	        else
+	                if [[ $cache ]]; then
+        	                if [[ $arrancable ]]; then
+                	                vboxmanage storagectl $1 --name $nombre --add $bus --controller $tipo --hostiocache on --bootable on
+                        	else
+	                                vboxmanage storagectl $1 --name $nombre --add $bus --controller $tipo --hostiocache on
+        	                fi
+	                else
+        	                if [[ $arrancable ]]; then
+                	                vboxmanage storagectl $1 --name $nombre --add $bus --controller $tipo --bootable on
+                        	else
+                        	        vboxmanage storagectl $1 --name $nombre --add $bus --controller $tipo
+	                        fi
+        	        fi
+		fi
+	else
+		if [[ $numpuertos ]]; then
+        		if [[ $cache ]]; then
+                		if [[ $arrancable ]]; then
+                        		vboxmanage storagectl $1 --name $nombre --add $bus --portcount $num --hostiocache on --bootable on
+	                        else
+        	                	vboxmanage storagectl $1 --name $nombre --add $bus --portcount $num --hostiocache on
+                	        fi
+	                else
+        	                if [[ $arrancable ]]; then
+                	                vboxmanage storagectl $1 --name $nombre --add $bus --portcount $num --bootable on
+                        	else
+	                                vboxmanage storagectl $1 --name $nombre --add $bus --portcount $num
+        	                fi
+                	fi
+	        else
+        	        if [[ $cache ]]; then
+                	        if [[ $arrancable ]]; then
+                        	        vboxmanage storagectl $1 --name $nombre --add $bus --hostiocache on --bootable on
+	                        else
+        	                        vboxmanage storagectl $1 --name $nombre --add $bus --hostiocache on
+                	        fi
+	                else
+				if [[ $arrancable ]]; then
+                	                vboxmanage storagectl $1 --name $nombre --add $bus --bootable on
+                        	else
+	                                vboxmanage storagectl $1 --name $nombre --add $bus
+        	                fi
+                	fi
+	        fi
+	fi
+}
+
+#Esta función configura las opciones de almacenamiento de una máquina virtual en Virtualbox.
+#Para ello, se toma como referencia los diferentes menús alojados en ./menus/almacenamiento/.
+#Acepta como argumento de entrada el nombre de la máquina virtual.
+function f_config_almacenamiento {
+	cat ./menus/vmconfig/almacenamiento/almacenamiento.txt
+	read opcion
+	while [[ $opcion != 7 ]]; do
+		if [[ $opcion = 1 ]]; then
+			f_añadecontrolador $1
+		else
+			echo 'Opción incorrecta.'
+		fi
 	done
 }
