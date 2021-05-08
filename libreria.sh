@@ -1024,6 +1024,7 @@ function f_config_pantalla {
 #Esta función añade un nuevo controlador de almacenamiento a una determinada máquina virtual en Virtualbox.
 #En el programa vboxmanager.sh, se emplea como parte de la función de configuración de almacenamiento (f_config_almacenamiento).
 #Acepta como argumento de entrada el nombre o la UUID de la máquina virtual.
+#Devuelve 0 al añadir el controlador en la máquina virtual, y 1 si no se ha podido añadir.
 function f_añadecontrolador {
 	echo '¿Qué nombre quieres darle al nuevo controlador?'
 	read nombre
@@ -1109,68 +1110,110 @@ function f_añadecontrolador {
 	if [[ $res = 's' ]]; then
 		arrancable=true
 	fi
-	if [[ $chipset ]]; then
-		if [[ $numpuertos ]]; then
-	        	if [[ $cache ]]; then
-	                	if [[ $arrancable ]]; then
+	if [[ $chipset = true ]]; then
+		if [[ $numpuertos = true ]]; then
+	        	if [[ $cache = true ]]; then
+	                	if [[ $arrancable = true ]]; then
 	                        	vboxmanage storagectl $1 --name $nombre --add $bus --controller $tipo --portcount $num --hostiocache on --bootable on
         	                else
-                	                vboxmanage storagectl $1 --name $nombre --add $bus --controller $tipo --portcount $num --hostiocache on
+                	                vboxmanage storagectl $1 --name $nombre --add $bus --controller $tipo --portcount $num --hostiocache on --bootable off
                         	fi
 	                else
-				if [[ $arrancable ]]; then
-	                                vboxmanage storagectl $1 --name $nombre --add $bus --controller $tipo --portcount $num --bootable on
+				if [[ $arrancable = true ]]; then
+	                                vboxmanage storagectl $1 --name $nombre --add $bus --controller $tipo --portcount $num --hostiocaache off --bootable on
 	                        else
-	                        	vboxmanage storagectl $1 --name $nombre --add $bus --controller $tipo --portcount $num
+	                        	vboxmanage storagectl $1 --name $nombre --add $bus --controller $tipo --portcount $num --hostiocache off --bootable off
 	                        fi
 	                fi
 	        else
-	                if [[ $cache ]]; then
-        	                if [[ $arrancable ]]; then
+	                if [[ $cache = true ]]; then
+        	                if [[ $arrancable = true ]]; then
                 	                vboxmanage storagectl $1 --name $nombre --add $bus --controller $tipo --hostiocache on --bootable on
                         	else
-	                                vboxmanage storagectl $1 --name $nombre --add $bus --controller $tipo --hostiocache on
+	                                vboxmanage storagectl $1 --name $nombre --add $bus --controller $tipo --hostiocache on --bootable off
         	                fi
 	                else
-        	                if [[ $arrancable ]]; then
-                	                vboxmanage storagectl $1 --name $nombre --add $bus --controller $tipo --bootable on
+        	                if [[ $arrancable = true ]]; then
+                	                vboxmanage storagectl $1 --name $nombre --add $bus --controller $tipo --hostiocache off --bootable on
                         	else
-                        	        vboxmanage storagectl $1 --name $nombre --add $bus --controller $tipo
+                        	        vboxmanage storagectl $1 --name $nombre --add $bus --controller $tipo --hostiocache off --bootable off
 	                        fi
         	        fi
 		fi
 	else
-		if [[ $numpuertos ]]; then
-        		if [[ $cache ]]; then
-                		if [[ $arrancable ]]; then
+		if [[ $numpuertos = true ]]; then
+        		if [[ $cache = true ]]; then
+                		if [[ $arrancable = true ]]; then
                         		vboxmanage storagectl $1 --name $nombre --add $bus --portcount $num --hostiocache on --bootable on
 	                        else
-        	                	vboxmanage storagectl $1 --name $nombre --add $bus --portcount $num --hostiocache on
+        	                	vboxmanage storagectl $1 --name $nombre --add $bus --portcount $num --hostiocache on --bootable off
                 	        fi
 	                else
-        	                if [[ $arrancable ]]; then
-                	                vboxmanage storagectl $1 --name $nombre --add $bus --portcount $num --bootable on
+        	                if [[ $arrancable = true ]]; then
+                	                vboxmanage storagectl $1 --name $nombre --add $bus --portcount $num --hostiocache off --bootable on
                         	else
-	                                vboxmanage storagectl $1 --name $nombre --add $bus --portcount $num
+	                                vboxmanage storagectl $1 --name $nombre --add $bus --portcount $num --hostiocache off --bootable off
         	                fi
                 	fi
 	        else
-        	        if [[ $cache ]]; then
-                	        if [[ $arrancable ]]; then
+        	        if [[ $cache = true ]]; then
+                	        if [[ $arrancable = true ]]; then
                         	        vboxmanage storagectl $1 --name $nombre --add $bus --hostiocache on --bootable on
 	                        else
-        	                        vboxmanage storagectl $1 --name $nombre --add $bus --hostiocache on
+        	                        vboxmanage storagectl $1 --name $nombre --add $bus --hostiocache on --bootable off
                 	        fi
 	                else
-				if [[ $arrancable ]]; then
-                	                vboxmanage storagectl $1 --name $nombre --add $bus --bootable on
+				if [[ $arrancable = true ]]; then
+                	                vboxmanage storagectl $1 --name $nombre --add $bus --hostiocache off --bootable on
                         	else
-	                                vboxmanage storagectl $1 --name $nombre --add $bus
+	                                vboxmanage storagectl $1 --name $nombre --add $bus --hostiocache off --bootable off
         	                fi
                 	fi
 	        fi
 	fi
+	if [[ $(vboxmanage showvminfo $1 | egrep 'Storage Controller Name' | egrep $nombre) ]]; then
+		echo "Controlador $nombre creado."
+		return 0
+	else
+		echo 'Error. Controlador no creado.'
+		return 1
+	fi
 }
+
+#Esta función elimina un controlador existente en una máquina virtual dada.
+#Acepta como argumento de entrada el nombre de la máquina virtual en la que se quiere eliminar un controlador.
+#Devuelve 0 después de eliminar el controlador, 1 si no hay ningún controlador en la máquina con ese nombre
+#y 2 si dicho controlador se encuentra en la máquina pero no se ha podido eliminar.
+#Esta función se emplea como una de las opciones en la función de configuración f_config_almacenamiento.
+function f_eliminar_controlador {
+	echo 'Introduce el nombre del controlador que quieres eliminar:'
+	read controlador
+        if [[ $(vboxmanage showvminfo $1 | egrep 'Storage Controller Name' | egrep $controlador) ]]; then
+		vboxmanage storagectl $1 --name $controlador --remove
+		if [[ $(vboxmanage showvminfo $1 | egrep 'Storage Controller Name' | egrep $controlador) ]]; then
+			echo 'Error. Controlador no eliminado.'
+			return 2
+		else
+			echo "Controlador $controlador eliminado."
+			return 0
+		fi
+	else
+		echo "No hay ningún controlador en $1 con ese nombre."
+		return 1
+	fi
+
+}
+
+#Esta función modifica un atributo concreto de un controlador de almacenamiento en una determinada máquina virtual.
+#Acepta como argumento de entrada el nombre de la máquina virtual.
+#Esta función se emplea como una de las opciones de la función de configuración f_config_almacenamiento.
+function f_modificar_controlador_almacenamiento {
+	echo ''
+}
+
+#Esta función agrega una nueva conexión de almacenamiento a una determinada máquina de Virtualbox.
+#Acepta como argumento de entrada el nombre de la máquina virtual.
+
 
 #Esta función configura las opciones de almacenamiento de una máquina virtual en Virtualbox.
 #Para ello, se toma como referencia los diferentes menús alojados en ./menus/almacenamiento/.
@@ -1181,8 +1224,12 @@ function f_config_almacenamiento {
 	while [[ $opcion != 7 ]]; do
 		if [[ $opcion = 1 ]]; then
 			f_añadecontrolador $1
+		elif [[ $opcion = 2 ]]; then
+                        f_eliminar_controlador $1
 		else
 			echo 'Opción incorrecta.'
 		fi
+		cat ./menus/vmconfig/almacenamiento/almacenamiento.txt
+	        read opcion
 	done
 }
