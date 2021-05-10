@@ -1028,155 +1028,159 @@ function f_config_pantalla {
 function f_añadecontrolador {
 	echo '¿Qué nombre quieres darle al nuevo controlador?'
 	read nombre
-	cat ./menus/vmconfig/almacenamiento/busessistema.txt
-	read opcion
-	while [[ $opcion < 1 || $opcion > 7 ]]; do
-		echo 'Opción incorrecta.'
-	        cat ./menus/vmconfig/almacenamiento/busessistema.txt
-        	read opcion2
-	done
-	if [[ $opcion = 1 ]]; then
-		bus="ide"
-	elif [[ $opcion = 2 ]]; then
-        	bus="sata"
-	elif [[ $opcion = 3 ]]; then
-        	bus="scsi"
-	elif [[ $opcion = 4 ]]; then
-        	bus="floppy"
-	elif [[ $opcion = 5 ]]; then
-	        bus="sas"
-	elif [[ $opcion = 6 ]]; then
-		bus="usb"
+	if [[ $(vboxmanage showvminfo $1 | egrep 'Storage Controller Name' | grep $nombre) ]]; then
+		echo 'Ya existe un controlador con ese nombre en la máquina.'
 	else
-	        bus="pcie"
-	fi
-	chipset=false
-	echo '¿Quieres elegir un chipset en particular? (s/n)'
-	read res
-	if [[ $res = 's' ]]; then
-		chipset=true
-	        cat ./menus/vmconfig/almacenamiento/chipsets.txt
-	        read opcion2
-	        if [[ $opcion2 = 1 ]]; then
-	        	tipo="PIIX4"
-	        elif [[ $opcion2 = 2 ]]; then
-	                tipo="PIIX3"
-	        elif [[ $opcion2 = 3 ]]; then
-	                tipo="ICH6"
-	        elif [[ $opcion2 = 4 ]]; then
-	                tipo="IntelAhci"
-	        elif [[ $opcion2 = 5 ]]; then
-	                tipo="LSILogic"
-	        elif [[ $opcion2 = 6 ]]; then
-	                tipo="BusLogic"
-		elif [[ $opcion2 = 7 ]]; then
-	                tipo="I82078"
-	        elif [[ $opcion2 = 8 ]]; then
-	                tipo="LSILogic SAS"
-	        elif [[ $opcion2 = 9 ]]; then
-	                tipo="USB"
-	        elif [[ $opcion2 = 10 ]]; then
-	                tipo="NVMe"
-	        elif [[ $opcion2 = 11 ]]; then
-	                tipo="VirtIO"
-	        else
-	                echo 'Opción incorrecta.'
-	        fi
-	fi
-	numpuertos=false
-	if [[ $opcion = 2 || $opcion = 5 ]]; then
-		echo '¿Quieres especificar una cantidad de puertos? (s/n)'
+		cat ./menus/vmconfig/almacenamiento/busessistema.txt
+		read opcion
+		while [[ $opcion < 1 || $opcion > 7 ]]; do
+			echo 'Opción incorrecta.'
+	        	cat ./menus/vmconfig/almacenamiento/busessistema.txt
+        		read opcion2
+		done
+		if [[ $opcion = 1 ]]; then
+			bus="ide"
+		elif [[ $opcion = 2 ]]; then
+        		bus="sata"
+		elif [[ $opcion = 3 ]]; then
+        		bus="scsi"
+		elif [[ $opcion = 4 ]]; then
+        		bus="floppy"
+		elif [[ $opcion = 5 ]]; then
+		        bus="sas"
+		elif [[ $opcion = 6 ]]; then
+			bus="usb"
+		else
+		        bus="pcie"
+		fi
+		chipset=false
+		echo '¿Quieres elegir un chipset en particular? (s/n)'
 		read res
 		if [[ $res = 's' ]]; then
-			numpuertos=true
-	        	echo 'Introduce una cantidad entre 1 y 30:'
-		        read num
-	        	while [[ $num -lt 1 || $num -gt 30 ]]; do
-	        		echo 'Cantidad incorrecta.'
-				echo 'Introduce una cantidad entre 1 y 30:'
-	                	read num
-	        	done
+			chipset=true
+	        	cat ./menus/vmconfig/almacenamiento/chipsets.txt
+	        	read opcion2
+	        	if [[ $opcion2 = 1 ]]; then
+	        		tipo="PIIX4"
+	        	elif [[ $opcion2 = 2 ]]; then
+	              		tipo="PIIX3"
+	        	elif [[ $opcion2 = 3 ]]; then
+	                	tipo="ICH6"
+	        	elif [[ $opcion2 = 4 ]]; then
+	        	        tipo="IntelAhci"
+	        	elif [[ $opcion2 = 5 ]]; then
+	        	        tipo="LSILogic"
+	        	elif [[ $opcion2 = 6 ]]; then
+	        	        tipo="BusLogic"
+			elif [[ $opcion2 = 7 ]]; then
+	        	        tipo="I82078"
+	        	elif [[ $opcion2 = 8 ]]; then
+	        	        tipo="LSILogic SAS"
+	        	elif [[ $opcion2 = 9 ]]; then
+	        	        tipo="USB"
+	        	elif [[ $opcion2 = 10 ]]; then
+	        	        tipo="NVMe"
+	        	elif [[ $opcion2 = 11 ]]; then
+	        	        tipo="VirtIO"
+	        	else
+	        	        echo 'Opción incorrecta.'
+	        	fi
 		fi
-	fi
-	cache=false
-	echo '¿Quieres usar la caché de E/S del anfitrión? (s/n)'
-	read res
-	if [[ $res = 's' ]]; then
-		cache=true
-	fi
-	arrancable=false
-	echo '¿Quieres que sea arrancable?'
-	read res
-	if [[ $res = 's' ]]; then
-		arrancable=true
-	fi
-	if [[ $chipset = true ]]; then
-		if [[ $numpuertos = true ]]; then
-	        	if [[ $cache = true ]]; then
-	                	if [[ $arrancable = true ]]; then
-	                        	vboxmanage storagectl $1 --name $nombre --add $bus --controller $tipo --portcount $num --hostiocache on --bootable on
-        	                else
-                	                vboxmanage storagectl $1 --name $nombre --add $bus --controller $tipo --portcount $num --hostiocache on --bootable off
-                        	fi
-	                else
-				if [[ $arrancable = true ]]; then
-	                                vboxmanage storagectl $1 --name $nombre --add $bus --controller $tipo --portcount $num --hostiocaache off --bootable on
-	                        else
-	                        	vboxmanage storagectl $1 --name $nombre --add $bus --controller $tipo --portcount $num --hostiocache off --bootable off
-	                        fi
-	                fi
-	        else
-	                if [[ $cache = true ]]; then
-        	                if [[ $arrancable = true ]]; then
-                	                vboxmanage storagectl $1 --name $nombre --add $bus --controller $tipo --hostiocache on --bootable on
-                        	else
-	                                vboxmanage storagectl $1 --name $nombre --add $bus --controller $tipo --hostiocache on --bootable off
-        	                fi
-	                else
-        	                if [[ $arrancable = true ]]; then
-                	                vboxmanage storagectl $1 --name $nombre --add $bus --controller $tipo --hostiocache off --bootable on
-                        	else
-                        	        vboxmanage storagectl $1 --name $nombre --add $bus --controller $tipo --hostiocache off --bootable off
-	                        fi
-        	        fi
+		numpuertos=false
+		if [[ $opcion = 2 || $opcion = 5 ]]; then
+			echo '¿Quieres especificar una cantidad de puertos? (s/n)'
+			read res
+			if [[ $res = 's' ]]; then
+				numpuertos=true
+	        		echo 'Introduce una cantidad entre 1 y 30:'
+			        read num
+	        		while [[ $num -lt 1 || $num -gt 30 ]]; do
+	        			echo 'Cantidad incorrecta.'
+					echo 'Introduce una cantidad entre 1 y 30:'
+	                		read num
+	        		done
+			fi
 		fi
-	else
-		if [[ $numpuertos = true ]]; then
-        		if [[ $cache = true ]]; then
-                		if [[ $arrancable = true ]]; then
-                        		vboxmanage storagectl $1 --name $nombre --add $bus --portcount $num --hostiocache on --bootable on
-	                        else
-        	                	vboxmanage storagectl $1 --name $nombre --add $bus --portcount $num --hostiocache on --bootable off
-                	        fi
-	                else
-        	                if [[ $arrancable = true ]]; then
-                	                vboxmanage storagectl $1 --name $nombre --add $bus --portcount $num --hostiocache off --bootable on
-                        	else
-	                                vboxmanage storagectl $1 --name $nombre --add $bus --portcount $num --hostiocache off --bootable off
-        	                fi
-                	fi
-	        else
-        	        if [[ $cache = true ]]; then
-                	        if [[ $arrancable = true ]]; then
-                        	        vboxmanage storagectl $1 --name $nombre --add $bus --hostiocache on --bootable on
-	                        else
-        	                        vboxmanage storagectl $1 --name $nombre --add $bus --hostiocache on --bootable off
-                	        fi
-	                else
-				if [[ $arrancable = true ]]; then
-                	                vboxmanage storagectl $1 --name $nombre --add $bus --hostiocache off --bootable on
-                        	else
-	                                vboxmanage storagectl $1 --name $nombre --add $bus --hostiocache off --bootable off
-        	                fi
-                	fi
-	        fi
-	fi
-	if [[ $(vboxmanage showvminfo $1 | egrep 'Storage Controller Name' | egrep $nombre) ]]; then
-		echo "Controlador $nombre creado."
-		return 0
-	else
-		echo 'Error. Controlador no creado.'
-		return 1
+		cache=false
+		echo '¿Quieres usar la caché de E/S del anfitrión? (s/n)'
+		read res
+		if [[ $res = 's' ]]; then
+			cache=true
+		fi
+		arrancable=false
+		echo '¿Quieres que sea arrancable?'
+		read res
+		if [[ $res = 's' ]]; then
+			arrancable=true
+		fi
+		if [[ $chipset = true ]]; then
+			if [[ $numpuertos = true ]]; then
+	        		if [[ $cache = true ]]; then
+	                		if [[ $arrancable = true ]]; then
+	                        		vboxmanage storagectl $1 --name $nombre --add $bus --controller $tipo --portcount $num --hostiocache on --bootable on
+        	                	else
+                	                	vboxmanage storagectl $1 --name $nombre --add $bus --controller $tipo --portcount $num --hostiocache on --bootable off
+                        		fi
+	                	else
+					if [[ $arrancable = true ]]; then
+	                               		vboxmanage storagectl $1 --name $nombre --add $bus --controller $tipo --portcount $num --hostiocaache off --bootable on
+	                        	else
+	                        		vboxmanage storagectl $1 --name $nombre --add $bus --controller $tipo --portcount $num --hostiocache off --bootable off
+	                        	fi
+	                	fi
+	        	else
+	                	if [[ $cache = true ]]; then
+        	                	if [[ $arrancable = true ]]; then
+                	                	vboxmanage storagectl $1 --name $nombre --add $bus --controller $tipo --hostiocache on --bootable on
+              	          		else
+	                                	vboxmanage storagectl $1 --name $nombre --add $bus --controller $tipo --hostiocache on --bootable off
+        	                	fi
+	                	else
+        	                	if [[ $arrancable = true ]]; then
+                	        	        vboxmanage storagectl $1 --name $nombre --add $bus --controller $tipo --hostiocache off --bootable on
+                        		else
+                        		        vboxmanage storagectl $1 --name $nombre --add $bus --controller $tipo --hostiocache off --bootable off
+	                        	fi
+        	        	fi
+			fi
+		else
+			if [[ $numpuertos = true ]]; then
+        			if [[ $cache = true ]]; then
+                			if [[ $arrancable = true ]]; then
+                        			vboxmanage storagectl $1 --name $nombre --add $bus --portcount $num --hostiocache on --bootable on
+	                        	else
+        	                		vboxmanage storagectl $1 --name $nombre --add $bus --portcount $num --hostiocache on --bootable off
+                	        	fi
+	                	else
+        	                	if [[ $arrancable = true ]]; then
+                	                	vboxmanage storagectl $1 --name $nombre --add $bus --portcount $num --hostiocache off --bootable on
+                        		else
+	                                	vboxmanage storagectl $1 --name $nombre --add $bus --portcount $num --hostiocache off --bootable off
+        	                	fi
+                		fi
+	        	else
+        	        	if [[ $cache = true ]]; then
+                		        if [[ $arrancable = true ]]; then
+                        		        vboxmanage storagectl $1 --name $nombre --add $bus --hostiocache on --bootable on
+	                	        else
+        	        	                vboxmanage storagectl $1 --name $nombre --add $bus --hostiocache on --bootable off
+                		        fi
+	                	else
+					if [[ $arrancable = true ]]; then
+                	        	        vboxmanage storagectl $1 --name $nombre --add $bus --hostiocache off --bootable on
+                        		else
+	                        	        vboxmanage storagectl $1 --name $nombre --add $bus --hostiocache off --bootable off
+        	                	fi
+                		fi
+	        	fi
+		fi
+		if [[ $(vboxmanage showvminfo $1 | egrep 'Storage Controller Name' | egrep $nombre) ]]; then
+			echo "Controlador $nombre creado."
+			return 0
+		else
+			echo 'Error. Controlador no creado.'
+			return 1
+		fi
 	fi
 }
 
@@ -1186,6 +1190,8 @@ function f_añadecontrolador {
 #y 2 si dicho controlador se encuentra en la máquina pero no se ha podido eliminar.
 #Esta función se emplea como una de las opciones en la función de configuración f_config_almacenamiento.
 function f_eliminar_controlador {
+	echo "Controladores de $1:"
+	vboxmanage showvminfo $1 | egrep 'Storage Controller Name' | awk '{print $5}'
 	echo 'Introduce el nombre del controlador que quieres eliminar:'
 	read controlador
         if [[ $(vboxmanage showvminfo $1 | egrep 'Storage Controller Name' | egrep $controlador) ]]; then
@@ -1208,18 +1214,18 @@ function f_eliminar_controlador {
 #Acepta como argumento de entrada el nombre de la máquina virtual.
 #Esta función se emplea como una de las opciones de la función de configuración f_config_almacenamiento.
 function f_modificar_controlador_almacenamiento {
-	echo "Controladores de $1"
+	echo "Controladores de $1:"
 	vboxmanage showvminfo $1 | egrep 'Storage Controller Name' | awk '{print $5}'
 	echo 'Introduce el nombre del controlador que quieras modificar:'
 	read controlador
-	if [[ $(vboxmanage showvminfo $1 | egrep 'Storage Controller Name'| egrep $nombre) ]]; then
+	if [[ $(vboxmanage showvminfo $1 | egrep 'Storage Controller Name'| grep "$nombre") ]]; then
 		cat ./menus/vmconfig/almacenamiento/controlmod.txt
 		read opcion
 		if [[ $opcion = 1 ]]; then
 			echo 'Introduce el nuevo nombre del controlador:'
 			read nuevo
 			vboxmanage storagectl $1 --name $controlador --rename $nuevo
-			if [[ $(vboxmanage showvminfo $1 | egrep 'Storage Controller Name' | egrep $nombre) ]]; then
+			if [[ $(vboxmanage showvminfo $1 | egrep 'Storage Controller Name' | grep "$nombre") ]]; then
 				echo 'Nombre modificado.'
 			else
 				echo 'Error. No se ha cambiado el nombre.'
@@ -1252,20 +1258,22 @@ function f_modificar_controlador_almacenamiento {
                 	else
                 	        echo 'Opción incorrecta.'
                 	fi
-			vboxmanage storagectl $1 --name $controlador --chipset $tipo
-			if [[ $(vboxmanage showvminfo $1 | egrep 'Storage Controller Type' | egrep $tipo) ]]; then
+			vboxmanage storagectl $1 --name $controlador --controller $tipo
+			if [[ $(vboxmanage showvminfo $1 | egrep 'Storage Controller Type' | grep "$tipo") ]]; then
 				echo "Nuevo chipset de $controlador: $tipo"
 			else
 				echo 'Error. Chipset no cambiado.'
 			fi
 		elif [[ $opcion = 3 ]]; then
-			index=$(vboxmanage showvminfo $1 | egrep $controlador | awk '{print $4}')
+			index=$(vboxmanage showvminfo $1 | egrep 'Storage Controller Name' | grep "$controlador" | awk '{print $4}')
 			echo 'Introduce un nuevo número de puertos:'
 			echo "Número máximo de puertos: $(vboxmanage showvminfo $1 | egrep 'Max Port Count' | grep $index | awk '{print $7}')"
 			read numpuertos
-			if [[ $numpuertos -gt $(vboxmanage showvminfo $1 | egrep 'Max Port Count' | grep $index | awk '{print $7}') ]]; then
+			max=$(vboxmanage showvminfo $1 | egrep 'Max Port Count' | grep "$index" | awk '{print $7}')
+			if [[ $numpuertos -lt $max || $numpuertos -eq $max ]]; then
 				vboxmanage storagectl $1 --name $controlador --portcount $numpuertos
-				if [[ $(vboxmanage showvminfo $1 | egrep 'Port Count' | grep $index | awk '{print $7}') = $numpuertos ]]; then
+				num=$(vboxmanage showvminfo $1 | egrep 'Controller Port Count' | grep "$index" | awk '{print $6}')
+				if [[ $num = $numpuertos ]]; then
 					echo 'Número de puertos modificado.'
 				else
 					echo 'Error. Número de puertos no modificado.'
@@ -1301,88 +1309,349 @@ function f_modificar_controlador_almacenamiento {
 	fi
 }
 
-#Esta función agrega una nueva conexión de almacenamiento a una determinada máquina de Virtualbox.
+#Esta función agrega o modifica una nueva conexión de almacenamiento a una determinada máquina de Virtualbox.
+#Los atributos configurados en la función son los justos y necesarios para agregar la conexión.
 #Acepta como argumento de entrada el nombre de la máquina virtual.
-function f_añadir_conexion_almacenamiento {
+function f_modificar_conexion_almacenamiento {
+	echo "Controladores de $1:"
+        vboxmanage showvminfo $1 | egrep 'Storage Controller Name' | awk '{print $5}'
 	echo 'Introduce el nombre del controlador:'
 	read controlador
-	index=$(vboxmanage showvminfo $1 | egrep $controlador | awk '{print $4}')
-	if [[ $(vboxmanage showvminfo $1 | egrep 'Port Count' | grep $index | awk '{print $7}') != 1 ]]; then
-		echo "Número de puertos de $controlador: $(vboxmanage showvminfo $1 | egrep 'Port Count' | grep $index | awk '{print $7}')"
-		echo 'Introduce el puerto en el que quieres conectar el dispositivo:'
-		read numpuerto
-		if [[ $numpuerto -gt $(vboxmanage showvminfo $1 | egrep 'Max Port Count' | grep $index | awk '{print $7}') ]]; then
-			echo 'Ese puerto no existe.'
-		else
-			tipo=$(vboxmanage showvminfo $1 | egrep 'Storage Controller Type' | grep $index | awk '{print $5}')
-			puerto=$(vboxmanage showvminfo $1 | egrep "^$controlador" | awk '{print $2}')
-			dispositivo=$(vboxmanage showvminfo $1 | egrep "^$controlador" | awk '{print $3}')
-			if [[ $tipo = 'PIIX4' || $tipo = 'PIIX3' || $tipo = 'ICH6' ]]; then
+	index=$(vboxmanage showvminfo $1 | egrep 'Controller Name' | egrep $controlador | awk '{print $4}')
+	if [[ $(vboxmanage showvminfo $1 | egrep 'Controller Port Count' | grep "$index" | awk '{print $7}') != 1 ]]; then
+		tipo=$(vboxmanage showvminfo $1 | egrep 'Storage Controller Type' | grep "$index" | awk '{print $5}')
+                puerto=$(vboxmanage showvminfo $1 | egrep "^$controlador" | awk '{print $2}')
+                dispositivo=$(vboxmanage showvminfo $1 | egrep "^$controlador" | awk '{print $3}')
+		if [[ $tipo = 'PIIX4' || $tipo = 'PIIX3' || $tipo = 'ICH6' ]]; then
+			echo "Número de puertos de $controlador: $(vboxmanage showvminfo $1 | egrep 'Port Count' | grep $index | awk '{print $7}')"
+			echo 'Introduce el puerto en el que quieres conectar el dispositivo:'
+			read numpuerto
+			if [[ $numpuerto -gt $(vboxmanage showvminfo $1 | egrep 'Max Port Count' | grep "$index" | awk '{print $7}') ]]; then
+				echo 'Ese puerto no existe.'
+			else
 				echo 'Introduce un número de dispositivo en ese puerto (0/1):'
 				read numdispositivo
-				if [[ $(echo $puerto | egrep $numpuerto) && $(echo $dispositivo | egrep $numdispositivo) ]]; then
-					echo 'Ese número de dispositivo del puerto introducido ya está ocupado.'
-				else
-					cat ./menus/vmconfig/almacenamiento/medioconexion.txt
-					read opcion
-					if [[ $opcion = 1 ]]; then
-						vboxmanage storageattach $1 --storagectl $controlador --port $numpuerto --device $numdispositivo --medium none
-					elif [[ $opcion = 2 ]]; then
-						cat ./menus/vmconfig/almacenamiento/tipoconexion.txt
-						read opcion2
-						if [[ $opcion2 = 2 ]]; then
-							echo 'Tipo de conexión no permitida.'
-						else
-							if [[ $opcion2 = 1 ]]; then
-								vboxmanage storageattach $1 --storagectl $controlador --port $numpuerto --device $numdispositivo --type dvddrive --medium emptydrive
-							elif [[ $opcion2 = 3 ]]; then
-								vboxmanage storageattach $1 --storagectl $controlador --port $numpuerto --device $numdispositivo --type fdd --medium emptydrive
-							fi
-						fi
-					elif [[ $opcion = 3 ]]; then
-						vboxmanage storageattach $1 --storagectl $controlador --port $numpuerto --medium additions
-					elif [[ $opcion = 4 ]]; then
-						cat ./menus/vmconfig/almacenamiento/tipoconexion.txt
-						read opcion2
+				cat ./menus/vmconfig/almacenamiento/medioconexion.txt
+				read opcion
+				if [[ $opcion = 1 ]]; then
+					vboxmanage storageattach $1 --storagectl $controlador --port $numpuerto --device $numdispositivo --medium none
+				elif [[ $opcion = 2 ]]; then
+					cat ./menus/vmconfig/almacenamiento/tipoconexion.txt
+					read opcion2
+					if [[ $opcion2 = 2 ]]; then
+						echo 'Tipo de conexión no permitida.'
+					else
 						if [[ $opcion2 = 1 ]]; then
-							if [[ $(vboxmanage list dvds | egrep '(^UUID|^Location)') ]]; then
-								echo 'Introduce una UUID de la siguiente lista:'
-								vboxmanage list dvds | egrep '(^UUID|^Location)'
-								echo 'UUID:'
-								read uuid
-								vboxmanage storageattach $1 --storagectl $controlador --port $numpuerto --device $numdispositivo --type dvddrive --medium $uuid
-							else
-								echo 'No tienes ninguna unidad de DVD en Virtualbox.'
-							fi
-						elif [[ $opcion2 = 2 ]]; then
-							if [[ $(vboxmanage list hdds | egrep '(^UUID|^Location)') ]]; then
-                                                                echo 'Introduce una UUID de la siguiente lista:'
-                                                                vboxmanage list hdds | egrep '(^UUID|^Location)'
-                                                                echo 'UUID:'
-                                                                read uuid
-								vboxmanage storageattach $1 --storagectl $controlador --port $numpuerto --device $numdispositivo --type hdd --medium $uuid
-                                                        else
-                                                                echo 'No tienes ningún disco duro en Virtualbox.'
-                                                        fi
+							vboxmanage storageattach $1 --storagectl $controlador --port $numpuerto --device $numdispositivo --type dvddrive --medium emptydrive
 						elif [[ $opcion2 = 3 ]]; then
-							if [[ $(vboxmanage list floppies | egrep '(^UUID|^Location)') ]]; then
-                                                                echo 'Introduce una UUID de la siguiente lista:'
-                                                                vboxmanage list floppies | egrep '(^UUID|^Location)'
-                                                                echo 'UUID:'
-                                                                read uuid
-                                                                vboxmanage storageattach $1 --storagectl $controlador --port $numpuerto --device $numdispositivo --type fdd --medium $uuid
-                                                        else
-                                                                echo 'No tienes ninguna unidad de disquete en Virtualbox.'
-                                                        fi
+							vboxmanage storageattach $1 --storagectl $controlador --port $numpuerto --device $numdispositivo --type fdd --medium emptydrive
 						fi
-					elif [[ $opcion = 5 ]]; then
-
+					fi
+				elif [[ $opcion = 3 ]]; then
+					vboxmanage storageattach $1 --storagectl $controlador --port $numpuerto --device $numdispositivo --medium additions
+				elif [[ $opcion = 4 ]]; then
+					cat ./menus/vmconfig/almacenamiento/tipoconexion.txt
+					read opcion2
+					if [[ $opcion2 = 1 ]]; then
+						if [[ $(vboxmanage list dvds | egrep '(^UUID|^Location)') ]]; then
+							echo 'Introduce una UUID de la siguiente lista:'
+							vboxmanage list dvds | egrep '(^UUID|^Location)'
+							echo 'UUID:'
+							read uuid
+							vboxmanage storageattach $1 --storagectl $controlador --port $numpuerto --device $numdispositivo --type dvddrive --medium $uuid
+						else
+							echo 'No tienes ninguna unidad de DVD en Virtualbox.'
+						fi
+					elif [[ $opcion2 = 2 ]]; then
+						if [[ $(vboxmanage list hdds | egrep '(^UUID|^Location)') ]]; then
+                                                	echo 'Introduce una UUID de la siguiente lista:'
+                                                        vboxmanage list hdds | egrep '(^UUID|^Location)'
+                                                        echo 'UUID:'
+                                                        read uuid
+							vboxmanage storageattach $1 --storagectl $controlador --port $numpuerto --device $numdispositivo --type hdd --medium $uuid
+                                                else
+                                                        echo 'No tienes ningún disco duro en Virtualbox.'
+                                                fi
+					elif [[ $opcion2 = 3 ]]; then
+						if [[ $(vboxmanage list floppies | egrep '(^UUID|^Location)') ]]; then
+                                                	echo 'Introduce una UUID de la siguiente lista:'
+                                                        vboxmanage list floppies | egrep '(^UUID|^Location)'
+                                                        echo 'UUID:'
+                                                        read uuid
+                                                        vboxmanage storageattach $1 --storagectl $controlador --port $numpuerto --device $numdispositivo --type fdd --medium $uuid
+                                                else
+                                                	echo 'No tienes ninguna unidad de disquete en Virtualbox.'
+                                                fi
+					fi
+				elif [[ $opcion = 5 ]]; then
+					echo 'Introduce la ruta del fichero:'
+					cat ./menus/vmconfig/almacenamiento/tipoconexion.txt
+					read opcion2
+					if [[ $opcion2 ]]; then
+						echo "Rutas de unidades de DVD guardadas en Virtualbox:"
+						vboxmanage list dvds | egrep '(^Location)'
+						read ruta
+						if [[ -e $ruta ]]; then
+							echo 'Ruta no encontrada.'
+						else
+							vboxmanage storageattach $1 --storagectl $controlador --port $numpuerto --device $numdispositivo --type dvddrive --medium $ruta
+						fi
+					elif [[ $opcion2 ]]; then
+						echo "Rutas de discos duros guardados en Virtualbox:"
+                                                vboxmanage list hdds | egrep '(^Location)'
+						read ruta
+						if [[ -e $ruta ]]; then
+                                                	echo 'Ruta no encontrada.'
+                                                else
+							vboxmanage storageattach $1 --storagectl $controlador --port $numpuerto --device $numdispositivo --type hdd --medium $ruta
+						fi
+					elif [[ $opcion2 ]]; then
+						echo "Rutas de unidades de disquete guardadas en Virtualbox:"
+                                                vboxmanage list floppies | egrep '(^Location)'
+						read ruta
+						if [[ -e $ruta ]]; then
+                                                        echo 'Ruta no encontrada.'
+                                                else
+							vboxmanage storageattach $1 --storagectl $controlador --port $numpuerto --device $numdispositivo --type fdd --medium $ruta
+						fi
+					fi
+				elif [[ $opcion = 6 ]]; then
+					echo 'Introduce la unidad de máquina anfitrión que quieras usar:'
+					read unidad
+					cat ./menus/vmconfig/almacenamiento/tipoconexion.txt
+       	                                read opcion2
+               	                        if [[ $opcion2 = 2 ]]; then
+                       	                        echo 'Tipo de conexión no permitida.'
+                               	        else
+                                  	        if [[ $opcion2 = 1 ]]; then
+                                            	        vboxmanage storageattach $1 --storagectl $controlador --port $numpuerto --device $numdispositivo --type dvddrive --medium $unidad
+                                                elif [[ $opcion2 = 3 ]]; then
+                                       	              	vboxmanage storageattach $1 --storagectl $controlador --port $numpuerto --device $numdispositivo --type fdd --medium $unidad
+                                                fi
+                                        fi
 				fi
-			elif [[ $tipo = 'IntelAhci' ]]; then
-				con
+			fi
+		elif [[ $tipo = 'IntelAhci' || $tipo = 'LsiLogicSas' ]]; then
+			echo "Número de puertos de $controlador: $(vboxmanage showvminfo $1 | egrep 'Controller Port Count' | grep $index | awk '{print $6}')"
+                	echo 'Introduce el puerto en el que quieres conectar el dispositivo:'
+                	read numpuerto
+                	if [[ $numpuerto -gt $(vboxmanage showvminfo $1 | egrep 'Max Port Count' | grep $index | awk '{print $7}') ]]; then
+                        	echo 'Ese puerto no existe.'
+                	else
+				cat ./menus/vmconfig/almacenamiento/medioconexion.txt
+                        	read opcion
+                        	if [[ $opcion = 1 ]]; then
+                        		vboxmanage storageattach $1 --storagectl $controlador --port $numpuerto --medium none
+                        	elif [[ $opcion = 2 ]]; then
+                        		cat ./menus/vmconfig/almacenamiento/tipoconexion.txt
+                                	read opcion2
+                                	if [[ $opcion2 = 2 ]]; then
+                                		echo 'Tipo de conexión no permitida.'
+                                	else
+                                		if [[ $opcion2 = 1 ]]; then
+                                        		vboxmanage storageattach $1 --storagectl $controlador --port $numpuerto --type dvddrive --medium emptydrive
+                                        	elif [[ $opcion2 = 3 ]]; then
+                                        		vboxmanage storageattach $1 --storagectl $controlador --port $numpuerto --type fdd --medium emptydrive
+                                        	fi
+                                	fi
+                       		elif [[ $opcion = 3 ]]; then
+                        		vboxmanage storageattach $1 --storagectl $controlador --port $numpuerto --medium additions
+				elif [[ $opcion = 4 ]]; then
+                                	cat ./menus/vmconfig/almacenamiento/tipoconexion.txt
+                                	read opcion2
+                                	if [[ $opcion2 = 1 ]]; then
+                        			if [[ $(vboxmanage list dvds | egrep '(^UUID|^Location)') ]]; then
+                                        		echo 'Introduce una UUID de la siguiente lista:'
+                                                	vboxmanage list dvds | egrep '(^UUID|^Location)'
+                                                	echo 'UUID:'
+                                                	read uuid
+                                                	vboxmanage storageattach $1 --storagectl $controlador --port $numpuerto --type dvddrive --medium $uuid
+                                        	else
+                                        		echo 'No tienes ninguna unidad de DVD en Virtualbox.'
+                                       		fi
+                                	elif [[ $opcion2 = 2 ]]; then
+                                		if [[ $(vboxmanage list hdds | egrep '(^UUID|^Location)') ]]; then
+							echo 'Introduce una UUID de la siguiente lista:'
+                                        	        vboxmanage list hdds | egrep '(^UUID|^Location)'
+                                                	echo 'UUID:'
+                                                	read uuid
+                                                	vboxmanage storageattach $1 --storagectl $controlador --port $numpuerto --type hdd --medium $uuid
+						else
+							echo 'No tienes ningún disco duro en Virtualbox.'
+						fi
+					elif [[ $opcion2 = 3 ]]; then
+                                		if [[ $(vboxmanage list floppies | egrep '(^UUID|^Location)') ]]; then
+                                	                echo 'Introduce una UUID de la siguiente lista:'
+                                	        	vboxmanage list floppies | egrep '(^UUID|^Location)'
+                                	                echo 'UUID:'
+                                	                read uuid
+                                	                vboxmanage storageattach $1 --storagectl $controlador --port $numpuerto --type fdd --medium $uuid
+                                	       	else
+                                	        	echo 'No tienes ninguna unidad de disquete en Virtualbox.'
+                                	        fi
+					fi
+				elif [[ $opcion = 5 ]]; then
+                        		cat ./menus/vmconfig/almacenamiento/tipoconexion.txt
+                                	read opcion2
+                                	if [[ $opcion2 ]]; then
+						echo "Rutas de unidades de DVD guardadas en Virtualbox:"
+                                	        vboxmanage list dvds | egrep '(^Location)'
+                                       		read ruta
+                                        	if [[ -e $ruta ]]; then
+                                        		echo 'Ruta no encontrada.'
+                                        	else
+                                        		vboxmanage storageattach $1 --storagectl $controlador --port $numpuerto --type dvddrive --medium $ruta
+						fi
+                                	elif [[ $opcion2 ]]; then
+						echo "Rutas de discos duros guardadas en Virtualbox:"
+                                	        vboxmanage list hdds | egrep '(^Location)'
+                                	        read ruta
+                                	        if [[ -e $ruta ]]; then
+                                	        	echo 'Ruta no encontrada.'
+                                	        else
+	                        	                vboxmanage storageattach $1 --storagectl $controlador --port $numpuerto --type hdd --medium $ruta
+						fi
+                                	elif [[ $opcion2 ]]; then
+						echo "Rutas de unidades de disquete guardadas en Virtualbox:"
+                                	        vboxmanage list floppies | egrep '(^Location)'
+                                       		read ruta
+                                        	if [[ -e $ruta ]]; then
+                                        		echo 'Ruta no encontrada.'
+                                        	else
+                                        	       	vboxmanage storageattach $1 --storagectl $controlador --port $numpuerto --type fdd --medium $ruta
+						fi
+                                	fi
+                        	elif [[ $opcion = 6 ]]; then
+                        		echo 'Introduce la unidad de máquina anfitrión que quieras usar:'
+                                	read unidad
+                                	cat ./menus/vmconfig/almacenamiento/tipoconexion.txt
+                                	read opcion2
+                                	if [[ $opcion2 = 2 ]]; then
+                                		echo 'Tipo de conexión no permitida.'
+                                	else
+                                		if [[ $opcion2 = 1 ]]; then
+                                	        	vboxmanage storageattach $1 --storagectl $controlador --port $numpuerto --type dvddrive --medium $unidad
+                                	        elif [[ $opcion2 = 3 ]]; then
+                                	        	vboxmanage storageattach $1 --storagectl $controlador --port $numpuerto --type fdd --medium $unidad
+                                	        fi
+                                	fi
+				fi
+			fi
+		else
+        		cat ./menus/vmconfig/almacenamiento/medioconexion.txt
+                	read opcion
+                	if [[ $opcion = 1 ]]; then
+                		vboxmanage storageattach $1 --storagectl $controlador --medium none
+                	elif [[ $opcion = 2 ]]; then
+	        		cat ./menus/vmconfig/almacenamiento/tipoconexion.txt
+        		        read opcion2
+                		if [[ $opcion2 = 2 ]]; then
+                	        	echo 'Tipo de conexión no permitida.'
+                	        else
+                	        	if [[ $opcion2 = 1 ]]; then
+                	                	vboxmanage storageattach $1 --storagectl $controlador --type dvddrive --medium emptydrive
+                	              	elif [[ $opcion2 = 3 ]]; then
+                	                        vboxmanage storageattach $1 --storagectl $controlador --type fdd --medium emptydrive
+					fi
+                	        fi
+                	elif [[ $opcion = 3 ]]; then
+                		vboxmanage storageattach $1 --storagectl $controlador --medium additions
+                	elif [[ $opcion = 4 ]]; then
+				cat ./menus/vmconfig/almacenamiento/tipoconexion.txt
+                		read opcion2
+                		if [[ $opcion2 = 1 ]]; then
+                	        	if [[ $(vboxmanage list dvds | egrep '(^UUID|^Location)') ]]; then
+                	                	echo 'Introduce una UUID de la siguiente lista:'
+                	                        vboxmanage list dvds | egrep '(^UUID|^Location)'
+                	                        echo 'UUID:'
+                	                        read uuid
+                	                        vboxmanage storageattach $1 --storagectl $controlador --type dvddrive --medium $uuid
+                	                else
+                	                	echo 'No tienes ninguna unidad de DVD en Virtualbox.'
+                	                fi
+                	        elif [[ $opcion2 = 2 ]]; then
+                	        	if [[ $(vboxmanage list hdds | egrep '(^UUID|^Location)') ]]; then
+                	                	echo 'Introduce una UUID de la siguiente lista:'
+                	                        vboxmanage list dvds | egrep '(^UUID|^Location)'
+                	                        echo 'UUID:'
+                	                        read uuid
+						vboxmanage storageattach $1 --storagectl $controlador --type hdd --medium $uuid
+                	                else
+                	                	echo 'No tienes ningún disco duro en Virtualbox.'
+                	                fi
+                	        elif [[ $opcion2 = 3 ]]; then
+                	        	if [[ $(vboxmanage list floppies | egrep '(^UUID|^Location)') ]]; then
+                	                	echo 'Introduce una UUID de la siguiente lista:'
+                	                        vboxmanage list floppies | egrep '(^UUID|^Location)'
+                	                        echo 'UUID:'
+                	                        read uuid
+                        	                vboxmanage storageattach $1 --storagectl $controlador --type fdd --medium $uuid
+                        	        else
+                        	        	echo 'No tienes ninguna unidad de disquete en Virtualbox.'
+                        	        fi
+				fi
+                	elif [[ $opcion = 5 ]]; then
+                		cat ./menus/vmconfig/almacenamiento/tipoconexion.txt
+                	        read opcion2
+                	        if [[ $opcion2 ]]; then
+					echo "Rutas de unidades de DVD guardadas en Virtualbox:"
+                	                vboxmanage list dvds | egrep '(^Location)'
+                	                read ruta
+                	                if [[ -e $ruta ]]; then
+                	                	echo 'Ruta no encontrada.'
+                	                else
+                	                	vboxmanage storageattach $1 --storagectl $controlador --type dvddrive --medium $ruta
+					fi
+                	        elif [[ $opcion2 ]]; then
+					echo "Rutas de discos duros guardadas en Virtualbox:"
+                	                vboxmanage list hdds | egrep '(^Location)'
+                        	        read ruta
+                        	        if [[ -e $ruta ]]; then
+                        	        	echo 'Ruta no encontrada.'
+                        	        else
+                        	                vboxmanage storageattach $1 --storagectl $controlador --type hdd --medium $ruta
+					fi
+                        	elif [[ $opcion2 ]]; then
+					echo "Rutas de unidades de disquete guardadas en Virtualbox:"
+                        	        vboxmanage list floppies | egrep '(^Location)'
+                               		read ruta
+                                	if [[ -e $ruta ]]; then
+                                		echo 'Ruta no encontrada.'
+                                	else
+                                	        vboxmanage storageattach $1 --storagectl $controlador --type fdd --medium $ruta
+					fi
+				fi
+                	elif [[ $opcion = 6 ]]; then
+                		echo 'Introduce la unidad de máquina anfitrión que quieras usar:'
+                	        read unidad
+                	        cat ./menus/vmconfig/almacenamiento/tipoconexion.txt
+                	        read opcion2
+                	        if [[ $opcion2 = 2 ]]; then
+                	        	echo 'Tipo de conexión no permitida.'
+                	        else
+                	                if [[ $opcion2 = 1 ]]; then
+                	                	vboxmanage storageattach $1 --storagectl $controlador --type dvddrive --medium $unidad
+                	                elif [[ $opcion2 = 3 ]]; then
+                	                        vboxmanage storageattach $1 --storagectl $controlador --type fdd --medium $unidad
+                	                fi
+                	        fi
+                	fi
+                fi
+	else
+		echo "No hay ningún controlador en la máquina $1 con ese nombre."
+	fi
+	if [[ $numdispositivo = $null ]]; then
+		if [[ $(vboxmanage showvminfo $1 | grep "$controlador ($numpuerto, 0)") ]]; then
+			echo 'Conexión añadida.'
+		else
+			echo 'Error. Conexión no añadida.'
 		fi
 	else
-		
+		if [[ $(vboxmanage showvminfo $1 | grep "$controlador ($numpuerto, $numdispositivo)") ]]; then
+                        echo 'Conexión añadida.'
+                else
+                        echo 'Error. Conexión no añadida.'
+                fi
 	fi
 }
 
@@ -1392,16 +1661,14 @@ function f_añadir_conexion_almacenamiento {
 function f_config_almacenamiento {
 	cat ./menus/vmconfig/almacenamiento/almacenamiento.txt
 	read opcion
-	while [[ $opcion != 7 ]]; do
+	while [[ $opcion != 5 ]]; do
 		if [[ $opcion = 1 ]]; then
 			f_añadecontrolador $1
 		elif [[ $opcion = 2 ]]; then
                         f_eliminar_controlador $1
 		elif [[ $opcion = 3 ]]; then
-			f_añadir_conexion_almacenamiento $1
+			f_modificar_conexion_almacenamiento $1
 		elif [[ $opcion = 4 ]]; then
-			
-		elif [[ $opcion = 5 ]]; then
 			f_modificar_controlador_almacenamiento $1
 		else
 			echo 'Opción incorrecta.'
