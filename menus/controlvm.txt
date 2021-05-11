@@ -1,0 +1,12 @@
+
+Selecciona una opción del siguiente menú:
+
+1) Pausar máquina
+2) Reanudar máquina
+3) Reiniciar máquina
+4) Apagado brusco
+5) Apagado suave
+6) Guardar estado
+7) Volver al menú principal
+
+Opción:

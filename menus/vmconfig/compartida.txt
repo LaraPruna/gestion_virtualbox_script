@@ -1,0 +1,8 @@
+
+Selecciona una opción del siguiente menú:
+
+1) Añadir carpeta compartida
+2) Eliminar carpeta compartida
+3) Volver al menú principal
+
+Opción:

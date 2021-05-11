@@ -7,9 +7,7 @@
 4) Almacenamiento
 5) Audio
 6) Red
-7) Puertos serie
-8) USB
-9) Carpetas compartidas
-10) Volver al menú principal
+7) Carpetas compartidas
+8) Volver al menú principal
 
 Opción:

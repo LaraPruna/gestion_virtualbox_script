@@ -1801,9 +1801,7 @@ function f_config_red {
 	else
 		echo 'Opción incorrecta.'
 	fi
-	if [[ $opcion = 1 ]]; then
-		continue
-	elif [[ $opcion != $null ]]; then
+	if [[ $opcion != $null && $opcion != 1 ]]; then
 		cat ./menus/vmconfig/red/opc_red.txt
 		read opcion2
 		while [[ $opcion2 != 8 ]]; do
@@ -1821,18 +1819,12 @@ function f_config_red {
 							echo 'Error. Nombre no modificado.'
 						fi
 					elif [[ $opcion = 5 ]]; then
-						echo '¿Quieres especificar una interfaz? (s/n)'
-                                                read res
-                                                if [[ $res = 's' ]]; then
-							vboxmanage modifyvm $1 --bridgeadapter$num $nombre
-							if [[ $(vboxmanage showvminfo $1 | egrep "NIC $num:" | awk '{print $8}' | grep "$nombre") ]]; then
-                	                                        echo 'Nombre modificado.'
-                        	                        else
-                                	                        echo 'Error. Nombre no modificado.'
-                                        	        fi
-						elif [[ $res = 'n' ]]; then
-							vboxmanage modifyvm $1 --bridgeadapter$num none
-						fi
+						vboxmanage modifyvm $1 --bridgeadapter$num $nombre
+						if [[ $(vboxmanage showvminfo $1 | egrep "NIC $num:" | awk '{print $8}' | grep "$nombre") ]]; then
+               	                                        echo 'Nombre modificado.'
+                       	                        else
+                               	                        echo 'Error. Nombre no modificado.'
+                                       	        fi
 					elif [[ $opcion = 6 ]]; then
 						vboxmanage modifyvm $1 --intnet$num $nombre
 						if [[ $(vboxmanage showvminfo $1 | egrep "NIC $num:" | awk '{print $8}' | grep "$nombre") ]]; then
@@ -1841,18 +1833,12 @@ function f_config_red {
                                                         echo 'Error. Nombre no modificado.'
                                                 fi
 					elif [[ $opcion = 7 ]]; then
-						echo '¿Quieres especificar una interfaz? (s/n)'
-                                                read res
-                                                if [[ $res = 's' ]]; then
-							vboxmanage modifyvm $1 --hostonlyadapter$num $nombre
-							if [[ $(vboxmanage showvminfo $1 | egrep "NIC $num:" | awk '{print $8}' | grep "$nombre") ]]; then
-                                                                echo 'Nombre modificado.'
-                                                        else
-                                                                echo 'Error. Nombre no modificado.'
-                                                        fi
-						elif [[ $res = 'n' ]]; then
-							vboxmanage modifyvm $1 --hostonlyadapter$num none
-						fi
+						vboxmanage modifyvm $1 --hostonlyadapter$num $nombre
+						if [[ $(vboxmanage showvminfo $1 | egrep "NIC $num:" | awk '{print $8}' | grep "$nombre") ]]; then
+                                                        echo 'Nombre modificado.'
+                                                else
+                                                        echo 'Error. Nombre no modificado.'
+                                                fi
 					elif [[ $opcion = 8 ]]; then
 						vboxmanage modifyvm $1 --nicgenericdrv$num $nombre
 						if [[ $(vboxmanage showvminfo $1 | egrep "NIC $num:" | awk '{print $8}' | grep "$nombre") ]]; then
@@ -1907,12 +1893,14 @@ function f_config_red {
 				read res
 				if [[ $res = 's' ]]; then
 					vboxmanage modifyvm $1 --macaddress$num auto
-					echo "Nueva MAC: $(vboxmanage showvminfo $1 | grep 'NIC $num:' | awk '{print $4}' | egrep -o '[0-9A-Z]*')"
+					macfinal=$(vboxmanage showvminfo $1 | grep "NIC $num:" | awk '{print $4}' | egrep -o '[0-9A-Z]*')
+					echo "Nueva MAC: $macfinal"
 				elif [[ $res = 'n' ]]; then
 					echo 'Introduce la nueva MAC:'
 					read mac
 					vboxmanage modifyvm $1 --macaddress$num $mac
-					echo "Nueva MAC: $(vboxmanage showvminfo $1 | grep 'NIC $num:' | awk '{print $4}' | egrep -o '[0-9A-Z]*')"
+					macfinal=$(vboxmanage showvminfo $1 | grep "NIC $num:" | awk '{print $4}' | egrep -o '[0-9A-Z]*')
+					echo "Nueva MAC: $macfinal"
 				fi
 			elif [[ $opcion2 = 5 ]]; then
 				echo '¿Quieres habilitar la opción de cable conectado? (s/n)'
@@ -1931,9 +1919,9 @@ function f_config_red {
 					if [[ $res = 'a' ]]; then
 						echo 'Dale un nombre a la nueva regla:'
 						read nombre
-						echo '¿(T)CP o (U)DP?'
+						echo '¿(tcp) o (udp)?'
 						read protocolo
-						if [[ $protocolo != 'T' || $protocolo != 'U' ]]; then
+						if [[ $protocolo != 'tcp' && $protocolo != 'udp' ]]; then
 							echo 'Respuesta errónea.'
 						else
 							echo 'Puerto del host:'
@@ -1953,35 +1941,37 @@ function f_config_red {
                                                                 read ipguest
                                                         fi
 							if [[ $iphost = $null && $ipguest = $null ]]; then
-								vboxmanage modifyvm $1 --natpf$num $nombre,$protocolo,$hport,$gport
+								vboxmanage modifyvm $1 --natpf$num $nombre,$protocolo,,$hport,,$gport
 							elif [[ $iphost = $null ]]; then
-								vboxmanage modifyvm $1 --natpf$num $nombre,$protocolo,$hport,$ipguest,$gport
+								vboxmanage modifyvm $1 --natpf$num $nombre,$protocolo,,$hport,$ipguest,$gport
 							elif [[ $ipguest = $null ]]; then
-								vboxmanage modifyvm $1 --natpf$num $nombre,$protocolo,$iphost,$hport,$gport
+								vboxmanage modifyvm $1 --natpf$num $nombre,$protocolo,$iphost,$hport,,$gport
 							else
 								vboxmanage modifyvm $1 --natpf$num $nombre,$protocolo,$iphost,$hport,$ipguest,$gport
+							fi
+							if [[ $(vboxmanage showvminfo $1 | egrep "name = $nombre") ]]; then
+								echo 'Regla añadida.'
+							else
+								echo 'Error. Regla no añadida.'
 							fi
 						fi
 					elif [[ $res = 'e' ]]; then
 						echo 'Introduce el nombre de la regla que quieres eliminar:'
 						read nombre
 						vboxmanage modifyvm $1 --natpf$num delete $nombre
+						echo 'Regla eliminada.'
 					fi
 				else
 					echo 'Esta opción no está disponible para el tipo de red seleccionado.'
 				fi
 			elif [[ $opcion2 = 7 ]]; then
 				if [[ $opcion = 8 ]]; then
-					echo '¿Cuántos parámetros quieres pasar?'
-					read cantidad
-					for i in [1..$cantidad]; do
-						echo 'Parámetro:'
-						read par
-						echo 'Valor del parámetro:'
-						read valor
-						vboxmanage modifyvm $1 --nicproperty$num $par="$valor"
-					done
-					echo 'Parámetros añadidos.'
+					echo 'Parámetro:'
+					read par
+					echo 'Valor del parámetro:'
+					read valor
+					vboxmanage modifyvm $1 --nicproperty$num $par="$valor"
+					echo 'Parámetros añadido.'
 				else
 					echo 'Esta opción no está disponible para el tipo de red seleccionado.'
 				fi
@@ -1993,3 +1983,141 @@ function f_config_red {
 		done
 	fi
 }
+
+#Esta función configura las carpetas compartidas de una máquina virtual en Virtualbox.
+#Acepta como argumento de entrada el nombre de la máquina virtual.
+function f_config_compartida {
+	cat ./menus/vmconfig/compartida.txt
+	read opcion
+	while [[ $opcion != 3 ]]; do
+		if [[ $opcion = 1 ]]; then
+			echo 'Nombre de la nueva carpeta compartida:'
+			read nombre
+			echo 'Ruta de la carpeta compartida en el anfitrión:'
+			read ruta
+			if [[ $(f_existe_directorio $ruta; echo $?) = 0 ]]; then
+				echo '¿Quieres que la carpeta compartida sea transitoria (se creará al encenderse la VM y se perderá al apagarse)? (s/n)'
+				read res1
+				echo '¿Quieres que los ficheros de la carpeta compartida sean de solo lectura? (s/n)'
+				read res2
+				echo '¿Montar automáticamente la carpeta compartida (la ruta sería /media/USER/sf_nombre-carpeta o /media/sf_nombre-carpeta)? (s/n)'
+				read res3
+				if [[ $res1 = 's' && $res2 = 's' && $res3 = 's' ]]; then
+					vboxmanage sharedfolder add $1 --name $nombre --hostpath $ruta --transient --readonly --automount
+				elif [[ $res1 = 's' && $res2 = 's' ]]; then
+					vboxmanage sharedfolder add $1 --name $nombre --hostpath $ruta --transient --readonly
+				elif [[ $res1 = 's' && $res3 = 's' ]]; then
+					vboxmanage sharedfolder add $1 --name $nombre --hostpath $ruta --transient --automount
+				elif [[ $res2 = 's' && $res3 = 's' ]]; then
+					vboxmanage sharedfolder add $1 --name $nombre --hostpath $ruta --readonly --automount
+				elif [[ $res1 = 's' ]]; then
+					vboxmanage sharedfolder add $1 --name $nombre --hostpath $ruta --transient
+				elif [[ $res2 = 's' ]]; then
+					vboxmanage sharedfolder add $1 --name $nombre --hostpath $ruta --readonly
+				elif [[ $res3 = 's' ]]; then
+					vboxmanage sharedfolder add $1 --name $nombre --hostpath $ruta --automount
+				else
+					vboxmanage sharedfolder add $1 --name $nombre --hostpath $ruta
+				fi
+				if [[ $(vboxmanage showvminfo $1 | egrep $ruta) ]]; then
+					echo 'Carpeta compartida añadida.'
+				else
+					echo 'Error. Carpeta no añadida.'
+				fi
+			else
+				echo 'Ruta no encontrada.'
+			fi
+		elif [[ $opcion = 2 ]]; then
+			echo 'Introduce el nombre de la carpeta compartida:'
+			read nombre
+			vboxmanage sharedfolder remove $1 --name $nombre
+			echo 'Carpeta retirada.'
+		else
+			echo 'Opción incorrecta.'
+		fi
+		cat ./menus/vmconfig/compartida.txt
+	        read opcion
+	done
+}
+
+#Esta función inicia una máquina virtual de Virtualbox.
+#Acepta como argumento de entrada el nombre de la máquina virtual.
+function f_iniciar_maquina {
+	echo '¿Quieres especificar un tipo de inicio en particular (por defecto, se iniciará con una interfaz gráfica)? (s/n)'
+	read res
+	if [[ $res = 's' ]]; then
+		cat ./menus/inicio.txt
+		read opcion
+		if [[ $opcion = 1 ]]; then
+			vboxmanage startvm $1 --type gui
+		elif [[ $opcion = 2 ]]; then
+			vboxmanage startvm $1 --type headless
+		elif [[ $opcion = 3 ]]; then
+			vboxmanage startvm $1 --type separate
+		fi
+	elif [[ $res = 'n' ]]; then
+		vboxmanage startvm $1
+	fi
+}
+
+#Esta función permite cambiar el estado de una máquina virtual de Virtualbox
+#que esté ejecutándose en ese momento. Entre otras acciones, se podrá
+#pausar, reanudar, reiniciar, realizar un apagado brusco o suave y guardar el estado.
+#Recibe como parámetro de entrada el nombre de la máquina virtual.
+function f_controlar_vm {
+	cat ./menus/controlvm.txt
+	read opcion
+	while [[ $opcion != 7 ]]; do
+		if [[ $opcion = 1 ]]; then
+			echo 'Esta opción pausa temporalmente la máquina virtual.'
+			echo 'Para reanudarla, seleccione la opción 2 del menú anterior.'
+			vboxmanage controlvm $1 pause
+			echo 'Máquina pausada.'
+		elif [[ $opcion = 2 ]]; then
+			vboxmanage controlvm $1 resume
+			echo 'Máquina reanudada.'
+		elif [[ $opcion = 3 ]]; then
+			echo 'Esta opción es equivalente a pulsar el botón de reinicio en una máquina real.'
+			echo 'El estado de la máquina no se guarda de antemano, por lo que podrías perder datos.'
+			echo '¿Seguro que quieres continuar? (s/n)'
+			read res
+			if [[ $res = 's' ]]; then
+				echo 'Reiniciando máquina...'
+				vboxmanage controlvm $1 reset
+			fi
+		elif [[ $opcion = 4 ]]; then
+			echo 'Esta opción es equivalente a desenchufar el cable de alimentación de una máquina real.'
+			echo 'El estado de la máquina no se guarda de antemano, por lo que podrías perder datos.'
+			echo '¿Seguro que quieres continuar? (s/n)'
+			read res
+			if [[ $res = 's' ]]; then
+                                echo 'Apagando máquina...'
+                                vboxmanage controlvm $1 poweroff
+                        fi
+		elif [[ $opcion = 5 ]]; then
+			echo 'Esta opción envía una señal de apagado ACPI, equivalente a pulsar el botón de apagado/encendido'
+			echo 'de una máquina real. A diferencia que el apagado brusco, esta opción realiza un cierre ordenado.'
+			echo '¿Seguro que quieres continuar? (s/n)'
+			read res
+                        if [[ $res = 's' ]]; then
+                                echo 'Apagando máquina...'
+                                vboxmanage controlvm $1 acpipowerbutton
+                        fi
+		elif [[ $opcion = 6 ]]; then
+			echo 'Esta opción guarda el estado actual de la máquina y la detiene. Al volver a iniciar la máquina,'
+			echo 'se encontrará en el mismo estado que antes.'
+			echo '¿Seguro que quieres continuar? (s/n)'
+			read res
+                        if [[ $res = 's' ]]; then
+                                echo 'Apagando máquina...'
+                                vboxmanage controlvm $1 savestate
+                        fi
+		else
+			echo 'Opción incorrecta.'
+		fi
+		cat ./menus/controlvm.txt
+	        read opcion
+	done
+}
+
+

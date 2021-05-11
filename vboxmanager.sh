@@ -24,7 +24,7 @@ if [[ $(f_eres_root;echo $?) = 0 ]]; then
 fi
 cat ./menus/mainmenu.txt
 read opcion
-while [[ $opcion != 14 ]]; do
+while [[ $opcion != 12 ]]; do
 	if [[ $opcion = 1 ]]; then
 		f_vmsinfo
 	elif [[ $opcion = 2 ]]; then
@@ -55,7 +55,7 @@ while [[ $opcion != 14 ]]; do
 		if [[ $(vboxmanage showvminfo $vm &> /dev/null;echo $?) = 0 ]]; then
 			cat ./menus/vmconfig/vmconfig.txt
 			read opcion2
-			while [[ $opcion2 != 10 ]]; do
+			while [[ $opcion2 != 8 ]]; do
 				if [[ $opcion2 = 1 ]]; then
 					f_config_general $vm
 				elif [[ $opcion2 = 2 ]]; then
@@ -68,6 +68,8 @@ while [[ $opcion != 14 ]]; do
 					f_config_audio $vm
 				elif [[ $opcion2 = 6 ]]; then
 					f_config_red $vm
+				elif [[ $opcion2 = 7 ]]; then
+					f_config_compartida $vm
 				else
 					echo 'Opción incorrecta.'
 				fi
@@ -77,6 +79,14 @@ while [[ $opcion != 14 ]]; do
 		else
 			echo 'No hay ninguna máquina registrada con ese nombre.'
 		fi
+	elif [[ $opcion = 7 ]]; then
+		echo 'Introduce el nombre de la máquina virtual que quieres iniciar:'
+		read vm
+		f_iniciar_maquina $vm
+	elif [[ $opcion = 8 ]]; then
+		echo 'Introduce el nombre de la máquina virtual:'
+                read vm
+		f_controlar_vm $vm
 	else
 		echo 'Error. Introduce una opción del menú.'
 	fi

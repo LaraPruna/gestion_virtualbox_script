@@ -1,0 +1,8 @@
+
+Selecciona un tipo de inicio de la siguiente lista:
+
+1) Interfaz gráfica de usuario
+2) Sin ventana, visualización remota
+3) Con interfaz de usuario en segundo plano
+
+Opción:

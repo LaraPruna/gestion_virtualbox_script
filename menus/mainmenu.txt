@@ -7,13 +7,11 @@ Selecciona una opción del siguiente menú:
 4) Modificar registros de máquinas virtuales
 5) Mover máquina virtual a otro directorio
 6) Modificar la configuración de una máquina virtual
-7) Importar máquina virtual
-8) Exportar máquina virtual
-9) Lanzar máquina virtual
-10) Opciones de apagado/encendido
-11) Gestionar instantáneas
-12) Gestionar dispositivos de almacenamiento
-13) Gestionar el ancho de banda de las máquinas
-14) Salir
+7) Lanzar máquina virtual
+8) Cambiar el estado de una máquina en ejecución
+9) Gestionar instantáneas
+10) Gestionar dispositivos de almacenamiento
+11) Gestionar el ancho de banda de las máquinas
+12) Salir
 
 Opción:
