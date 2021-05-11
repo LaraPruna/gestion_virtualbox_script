@@ -1,0 +1,10 @@
+
+Selecciona el controlador del audio del anfitrión:
+
+1) Nulo
+2) OSS
+3) ALSA
+4) PulseAudio
+5) CoreAudio
+
+Opción:

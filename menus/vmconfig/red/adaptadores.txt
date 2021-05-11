@@ -1,0 +1,13 @@
+
+Selecciona un tipo de red de la siguiente lista:
+
+1) Ninguno
+2) No contectado al anfitrión
+3) NAT
+4) Red NAT
+5) Adaptador puente
+6) Red interna
+7) Adaptador solo-anfitrión
+8) Controlador genérico
+
+Opción:

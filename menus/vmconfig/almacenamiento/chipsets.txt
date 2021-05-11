@@ -1,0 +1,18 @@
+
+Selecciona un chipset de la siguiente lista:
+
+1) PIIX4 (IDE)
+2) PIIX3 (IDE)
+3) ICH6 (IDE)
+4) AHCI (SATA)
+5) LsiLogic (SCSI)
+6) BusLogic (SCSI)
+7) I82078 (disquete)
+8) LsiLogic SAS (SAS)
+9) USB
+10) NVMe (PCIe)
+11) virtio-scsi
+
+Opción:
+
+

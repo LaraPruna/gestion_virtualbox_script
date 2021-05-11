@@ -1,0 +1,9 @@
+
+Selecciona una opción del siguiente menú:
+
+1) Controlador de audio en la máquina virtual
+2) (Des)habilitar salida de audio
+3) (Des)habilitar entrada de audio
+4) Guardar configuración y terminar
+
+Opción:

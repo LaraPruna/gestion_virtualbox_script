@@ -1,0 +1,11 @@
+
+Selecciona un tipo de adaptador de la siguiente lista:
+
+1) PCnet-PCI II (Am79C970A)
+2) PCnet-FAST III (Am79C973)
+3) Intel PRO/1000 MT Desktop (82540EM)
+4) Intel PRO/1000 T Server (82543GC)
+5) Intel PRO/1000 MT Server (82545EM)
+6) Red paravirtualizada (virtio-net)
+
+Opción:

@@ -1,0 +1,11 @@
+
+Selecciona un medio de conexión:
+
+1) Ninguno
+2) Unidad vacía
+3) Additions
+4) UUID de un dispositivo guardado en Virtualbox
+5) Ruta de archivo
+6) Unidad de DVD o disquete en la máquina anfitrión
+
+Opción:

@@ -1,0 +1,12 @@
+
+Selecciona un tipo de bus del sistema de la siguiente lista:
+
+1) IDE
+2) SATA
+3) SCSI
+4) Disquete
+5) SAS
+6) USB
+7) PCIe
+
+Opción:

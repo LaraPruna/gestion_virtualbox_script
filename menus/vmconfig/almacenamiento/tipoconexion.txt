@@ -1,0 +1,8 @@
+
+Selecciona un tipo de conexión:
+
+1) Unidad de DVD
+2) Disco duro
+3) Unidad de disquete
+
+Opción:

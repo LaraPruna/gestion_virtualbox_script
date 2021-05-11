@@ -1,0 +1,13 @@
+
+Selecciona una opción del siguiente menú:
+
+1) Especificar el nombre de la interfaz (no disponible para NAT y adaptadores no conectados)
+2) Especificar un tipo de adaptador
+3) Modificar opción de modo promiscuo (no disponible para NAT, controladores genéricos y adaptadores no conectados)
+4) Cambiar la dirección MAC
+5) (Des)habilitar cable conectado
+6) Modificar opciones de reenvío de puertos (solo para NAT)
+7) Pasar parámetros en las propiedades genéricas (solo para controladores genéricos)
+8) Volver al menú anterior
+
+Opción:

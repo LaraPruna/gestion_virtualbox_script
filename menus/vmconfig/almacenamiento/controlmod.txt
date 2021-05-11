@@ -1,0 +1,10 @@
+
+¿Qué atributo del controlador quieres modificar?
+
+1) Nombre
+2) Chipset
+3) Número de puertos
+4) Caché de E/S del anfitrión
+5) Arrancabilidad
+
+Opción:

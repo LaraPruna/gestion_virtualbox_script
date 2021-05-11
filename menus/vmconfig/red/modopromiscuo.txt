@@ -1,0 +1,8 @@
+
+Selecciona una opción de modo promiscuo:
+
+1) Denegar
+2) Permitir VMs
+3) Permitir todo
+
+Opción:

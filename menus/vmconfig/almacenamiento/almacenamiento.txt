@@ -1,0 +1,10 @@
+
+Selecciona una opción del siguiente menú:
+
+1) Añadir nuevo controlador de almacenamiento
+2) Eliminar controlador de almacenamiento
+3) Agregar o modificar conexión de almacenamiento
+4) Cambiar los atributos de un controlador
+5) Volver al menú anterior
+
+Opción:

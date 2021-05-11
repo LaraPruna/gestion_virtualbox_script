@@ -1,0 +1,8 @@
+
+Selecciona un controlador de la siguiente lista:
+
+1) ICH AC97
+2) SoundBlaster 16
+3) Audio Intel HD
+
+Opción:
