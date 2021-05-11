@@ -1,0 +1,13 @@
+
+Selecciona una opción del siguiente menú:
+
+1) Tomar instantánea
+2) Eliminar instantánea
+3) Restaurar máquina con el estado de una instantánea
+4) Restaurar la instantánea actual
+5) Editar instantánea
+6) Listar instantáneas
+7) Mostrar información detallada de una instantánea
+8) Volver al menú principal
+
+Opción:

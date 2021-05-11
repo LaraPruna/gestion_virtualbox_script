@@ -87,6 +87,10 @@ while [[ $opcion != 12 ]]; do
 		echo 'Introduce el nombre de la máquina virtual:'
                 read vm
 		f_controlar_vm $vm
+	elif [[ $opcion = 9 ]]; then
+		echo 'Introduce el nombre de la máquina virtual:'
+                read vm
+		f_gestionar_instantaneas $vm
 	else
 		echo 'Error. Introduce una opción del menú.'
 	fi

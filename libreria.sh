@@ -2120,4 +2120,95 @@ function f_controlar_vm {
 	done
 }
 
-
+#Esta función gestiona las instantáneas de una máquina virtual en Virtualbox.
+#Recibe como argumento de entrada el nombre de la máquina virtual. Permite tomar, listar,
+#editar y eliminar instantáneas, restaurar una máquina o una instantánea con el estado de otra
+#instantánea y mostrar información detallada sobre una instantánea en concreto.
+function f_gestionar_instantaneas {
+	cat ./menus/instantaneas.txt
+	read opcion
+	while [[ $opcion != 8 ]]; do
+		if [[ $opcion = 1 ]]; then
+			echo '¿Qué nombre quieres darle a la instantánea?'
+			read nombre
+			echo '¿Quieres añadirle una descripción? (s/n)'
+			read res
+			if [[ $res = 's' ]]; then
+				echo 'Introduce la descripción:'
+				read descripcion
+			fi
+			echo '¿La máquina de la que quieres sacar la instantánea está encendida? (s/n)'
+			read res2
+			if [[ $descripcion != $null && $res2 = 's' ]]; then
+				vboxmanage snapshot $1 take $nombre --description="$descripcion" --live
+			elif [[ $descripcion != $null ]]; then
+				vboxmanage snapshot $1 take $nombre --description="$descripcion"
+			elif [[ $res2 = 's' ]]; then
+				vboxmanage snapshot $1 take $nombre --live
+			else
+				vboxmanage snapshot $1 take $nombre
+			fi
+		elif [[ $opcion = 2 ]]; then
+			vboxmanage snapshot $1 list
+			echo 'Introduce el nombre de la instantánea:'
+			read nombre
+			vboxmanage snapshot $1 delete $nombre
+			if [[ $(vboxmanage snapshot $1 list | egrep $nombre) ]]; then
+				echo 'Error. Instantánea no borrada.'
+			else
+				echo 'Instantánea borrada.'
+			fi
+		elif [[ $opcion = 3 ]]; then
+			vboxmanage snapshot $1 list
+                        echo 'Introduce el nombre de la instantánea:'
+                        read nombre
+                        vboxmanage snapshot $1 restore $nombre
+			echo 'Máquina restaurada.'
+		elif [[ $opcion = 4 ]]; then
+			vboxmanage snapshot $1 restorecurrent
+			echo 'Instantánea restaurada.'
+		elif [[ $opcion = 5 ]]; then
+			echo 'Introduce el nombre de la instantánea:'
+			read inst
+			echo '¿Quieres cambiar el (n)ombre, la (d)escripción o (a)mbas cosas? (n/d/a)'
+			read res
+			if [[ $res = 'n' ]]; then
+				echo 'Introduce el nuevo nombre:'
+				read nombre
+				vboxmanage snapshot $1 edit $inst --name=$nombre
+				echo 'Nombre modificado.'
+			elif [[ $res = 'd' ]]; then
+				echo 'Introduce la nueva descripción:'
+				read descripcion
+				vboxmanage snapshot $1 edit $inst --description="$descripcion"
+				echo 'Descripción modificada.'
+			elif [[ $res = 'a' ]]; then
+				echo 'Introduce el nuevo nombre:'
+                                read nombre
+				echo 'Introduce la nueva descripción:'
+                                read descripcion
+				vboxmanage snapshot $1 edit $inst --description="$descripcion" --name=$nombre
+				echo 'Nombre y descripción modificados.'
+			fi
+		elif [[ $opcion = 6 ]]; then
+			echo "Instantáneas de $1:"
+			vboxmanage snapshot $1 list --details
+			if [[ $(echo $?) = 1 ]]; then
+                                echo 'Esa máquina no dispone de ninguna instantánea.'
+			fi
+		elif [[ $opcion = 7 ]]; then
+			vboxmanage snapshot $1 list
+			if [[ $(echo $?) = 1 ]]; then
+				echo 'Esa máquina no dispone de ninguna instantánea.'
+			else
+				echo 'Introduce el nombre de la instantánea:'
+				read inst
+				vboxmanage snapshot $1 showvminfo $inst
+			fi
+		else
+			echo 'Opción incorrecta.'
+		fi
+		cat ./menus/instantaneas.txt
+        	read opcion
+	done
+}
