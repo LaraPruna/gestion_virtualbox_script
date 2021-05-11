@@ -66,6 +66,8 @@ while [[ $opcion != 14 ]]; do
 					f_config_almacenamiento $vm
 				elif [[ $opcion2 = 5 ]]; then
 					f_config_audio $vm
+				elif [[ $opcion2 = 6 ]]; then
+					f_config_red $vm
 				else
 					echo 'Opción incorrecta.'
 				fi

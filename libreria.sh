@@ -1776,3 +1776,220 @@ function f_config_audio {
 
 #Esta función configura la pestaña de red en la configuración de una máquina virtual en Virtualbox.
 #Acepta como argumento de entrada el nombre de la máquina virtual.
+function f_config_red {
+	echo 'Introduce el número de adaptador que quieras configurar:'
+	read num
+	echo '¿Qué tipo de red quieres asignarle al adaptador?'
+	cat ./menus/vmconfig/red/adaptadores.txt
+	read opcion
+	if [[ $opcion = 1 ]]; then
+		vboxmanage modifyvm $1 --nic$num none
+	elif [[ $opcion = 2 ]]; then
+		vboxmanage modifyvm $1 --nic$num null
+	elif [[ $opcion = 3 ]]; then
+		vboxmanage modifyvm $1 --nic$num nat
+	elif [[ $opcion = 4 ]]; then
+		vboxmanage modifyvm $1 --nic$num natnetwork
+	elif [[ $opcion = 5 ]]; then
+		vboxmanage modifyvm $1 --nic$num bridged
+	elif [[ $opcion = 6 ]]; then
+		vboxmanage modifyvm $1 --nic$num intnet
+	elif [[ $opcion = 7 ]]; then
+		vboxmanage modifyvm $1 --nic$num hostonly
+	elif [[ $opcion = 8 ]]; then
+		vboxmanage modifyvm $1 --nic$num generic
+	else
+		echo 'Opción incorrecta.'
+	fi
+	if [[ $opcion = 1 ]]; then
+		continue
+	elif [[ $opcion != $null ]]; then
+		cat ./menus/vmconfig/red/opc_red.txt
+		read opcion2
+		while [[ $opcion2 != 8 ]]; do
+			if [[ $opcion2 = 1 ]]; then
+				if [[ $opcion = 2 || $opcion = 3 ]]; then
+					echo 'Esta opción no está disponible para el tipo de red seleccionado.'
+				else
+					if [[ $opcion = 4 ]]; then
+						echo 'Introduce el nombre de la interfaz:'
+                                        	read nombre
+						vboxmanage modifyvm $1 --nat-network$num $nombre
+						if [[ $(vboxmanage showvminfo $1 | egrep "NIC $num:" | awk '{print $8}' | grep "$nombre") ]]; then
+							echo 'Nombre modificado.'
+						else
+							echo 'Error. Nombre no modificado.'
+						fi
+					elif [[ $opcion = 5 ]]; then
+						echo '¿Quieres especificar una interfaz? (s/n)'
+                                                read res
+                                                if [[ $res = 's' ]]; then
+							vboxmanage modifyvm $1 --bridgeadapter$num $nombre
+							if [[ $(vboxmanage showvminfo $1 | egrep "NIC $num:" | awk '{print $8}' | grep "$nombre") ]]; then
+                	                                        echo 'Nombre modificado.'
+                        	                        else
+                                	                        echo 'Error. Nombre no modificado.'
+                                        	        fi
+						elif [[ $res = 'n' ]]; then
+							vboxmanage modifyvm $1 --bridgeadapter$num none
+						fi
+					elif [[ $opcion = 6 ]]; then
+						vboxmanage modifyvm $1 --intnet$num $nombre
+						if [[ $(vboxmanage showvminfo $1 | egrep "NIC $num:" | awk '{print $8}' | grep "$nombre") ]]; then
+                                                        echo 'Nombre modificado.'
+                                                else
+                                                        echo 'Error. Nombre no modificado.'
+                                                fi
+					elif [[ $opcion = 7 ]]; then
+						echo '¿Quieres especificar una interfaz? (s/n)'
+                                                read res
+                                                if [[ $res = 's' ]]; then
+							vboxmanage modifyvm $1 --hostonlyadapter$num $nombre
+							if [[ $(vboxmanage showvminfo $1 | egrep "NIC $num:" | awk '{print $8}' | grep "$nombre") ]]; then
+                                                                echo 'Nombre modificado.'
+                                                        else
+                                                                echo 'Error. Nombre no modificado.'
+                                                        fi
+						elif [[ $res = 'n' ]]; then
+							vboxmanage modifyvm $1 --hostonlyadapter$num none
+						fi
+					elif [[ $opcion = 8 ]]; then
+						vboxmanage modifyvm $1 --nicgenericdrv$num $nombre
+						if [[ $(vboxmanage showvminfo $1 | egrep "NIC $num:" | awk '{print $8}' | grep "$nombre") ]]; then
+                                                        echo 'Nombre modificado.'
+                                                else
+                                                	echo 'Error. Nombre no modificado.'
+                                                fi
+					fi
+				fi
+			elif [[ $opcion2 = 2 ]]; then
+				cat ./menus/vmconfig/red/tiposadaptador.txt
+				read opcion3
+				if [[ $opcion3 = 1 ]]; then
+					tipo='Am79C970A'
+					vboxmanage modifyvm $1 --nictype$num Am79C970A
+				elif [[ $opcion3 = 2 ]]; then
+					tipo='Am79C973'
+					vboxmanage modifyvm $1 --nictype$num Am79C973
+				elif [[ $opcion3 = 3 ]]; then
+					tipo='82540EM'
+					vboxmanage modifyvm $1 --nictype$num 82540EM
+				elif [[ $opcion3 = 4 ]]; then
+					tipo='82543GC'
+					vboxmanage modifyvm $1 --nictype$num 82543GC
+				elif [[ $opcion3 = 5 ]]; then
+					tipo='82545EM'
+					vboxmanage modifyvm $1 --nictype$num 82545EM
+				elif [[ $opcion3 = 6 ]]; then
+					tipo='virtio'
+					vboxmanage modifyvm $1 --nictype$num virtio
+				fi
+				echo "Tipo de adaptador seleccionado: $tipo"
+			elif [[ $opcion2 = 3 ]]; then
+				if [[ $opcion = 2 || $opcion = 3 || $opcion = 8 ]]; then
+					echo 'Esta opción no está disponible para el tipo de red seleccionado.'
+				else
+					cat ./menus/vmconfig/red/modopromiscuo.txt
+					read opcion3
+					if [[ $opcion3 = 1 ]]; then
+						vboxmanage modifyvm $1 --nicpromisc$num deny
+						echo 'Modo promiscuo denegado.'
+					elif [[ $opcion3 = 2 ]]; then
+						vboxmanage modifyvm $1 --nicpromisc$num allow-vms
+						echo 'Modo promiscuo permitido para todas las VM.'
+					elif [[ $opcion3 = 3 ]]; then
+						vboxmanage modifyvm $1 --nicpromisc$num allow-all
+						echo 'Modo promiscuo permitido siempre.'
+					fi
+				fi
+			elif [[ $opcion2 = 4 ]]; then
+				echo '¿Quieres generar la MAC de manera automática? (s/n)'
+				read res
+				if [[ $res = 's' ]]; then
+					vboxmanage modifyvm $1 --macaddress$num auto
+					echo "Nueva MAC: $(vboxmanage showvminfo $1 | grep 'NIC $num:' | awk '{print $4}' | egrep -o '[0-9A-Z]*')"
+				elif [[ $res = 'n' ]]; then
+					echo 'Introduce la nueva MAC:'
+					read mac
+					vboxmanage modifyvm $1 --macaddress$num $mac
+					echo "Nueva MAC: $(vboxmanage showvminfo $1 | grep 'NIC $num:' | awk '{print $4}' | egrep -o '[0-9A-Z]*')"
+				fi
+			elif [[ $opcion2 = 5 ]]; then
+				echo '¿Quieres habilitar la opción de cable conectado? (s/n)'
+				read res
+				if [[ $res = 's' ]]; then
+					vboxmanage modifyvm $1 --cableconnected$num on
+					echo 'Cable conectado.'
+				elif [[ $res = 'n' ]]; then
+					vboxmanage modifyvm $1 --cableconnected$num off
+					echo 'Cable desconectado.'
+				fi
+			elif [[ $opcion2 = 6 ]]; then
+				if [[ $opcion = 3 ]]; then
+					echo '¿Quieres (a)ñadir o (e)liminar una regla?'
+					read res
+					if [[ $res = 'a' ]]; then
+						echo 'Dale un nombre a la nueva regla:'
+						read nombre
+						echo '¿(T)CP o (U)DP?'
+						read protocolo
+						if [[ $protocolo != 'T' || $protocolo != 'U' ]]; then
+							echo 'Respuesta errónea.'
+						else
+							echo 'Puerto del host:'
+							read hport
+							echo 'Puerto de la máquina virtual:'
+							read gport
+							echo '¿Quieres especificar la IP del host? (s/n)'
+							read res2
+							if [[ $res2 = 's' ]]; then
+								echo 'IP del host:'
+								read iphost
+							fi
+							echo '¿Quieres especificar la IP de la máquina virtual? (s/n)'
+							read res2
+							if [[ $res2 = 's' ]]; then
+                                                                echo 'IP de la máquina virtual:'
+                                                                read ipguest
+                                                        fi
+							if [[ $iphost = $null && $ipguest = $null ]]; then
+								vboxmanage modifyvm $1 --natpf$num $nombre,$protocolo,$hport,$gport
+							elif [[ $iphost = $null ]]; then
+								vboxmanage modifyvm $1 --natpf$num $nombre,$protocolo,$hport,$ipguest,$gport
+							elif [[ $ipguest = $null ]]; then
+								vboxmanage modifyvm $1 --natpf$num $nombre,$protocolo,$iphost,$hport,$gport
+							else
+								vboxmanage modifyvm $1 --natpf$num $nombre,$protocolo,$iphost,$hport,$ipguest,$gport
+							fi
+						fi
+					elif [[ $res = 'e' ]]; then
+						echo 'Introduce el nombre de la regla que quieres eliminar:'
+						read nombre
+						vboxmanage modifyvm $1 --natpf$num delete $nombre
+					fi
+				else
+					echo 'Esta opción no está disponible para el tipo de red seleccionado.'
+				fi
+			elif [[ $opcion2 = 7 ]]; then
+				if [[ $opcion = 8 ]]; then
+					echo '¿Cuántos parámetros quieres pasar?'
+					read cantidad
+					for i in [1..$cantidad]; do
+						echo 'Parámetro:'
+						read par
+						echo 'Valor del parámetro:'
+						read valor
+						vboxmanage modifyvm $1 --nicproperty$num $par="$valor"
+					done
+					echo 'Parámetros añadidos.'
+				else
+					echo 'Esta opción no está disponible para el tipo de red seleccionado.'
+				fi
+			else
+				echo 'Opción incorrecta.'
+			fi
+			cat ./menus/vmconfig/red/opc_red.txt
+                	read opcion2
+		done
+	fi
+}
