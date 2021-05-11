@@ -1677,3 +1677,102 @@ function f_config_almacenamiento {
 	        read opcion
 	done
 }
+
+#Esta función configura la pestaña de audio en la configuración de una máquina virtual en Virtualbox.
+#Acepta como argumento de entrada el nombre de la máquina virtual.
+function f_config_audio {
+	echo "¿Quieres habilitar el audio en la máquina $1? (s/n)"
+	read res
+	if [[ $res = 's' ]]; then
+		cat ./menus/vmconfig/audio/ctlanfitrion.txt
+		read opcion
+		if [[ $opcion = 1 ]]; then
+			audio='null'
+		elif [[ $opcion = 2 ]]; then
+			audio='oss'
+		elif [[ $opcion = 3 ]]; then
+			audio='alsa'
+		elif [[ $opcion = 4 ]]; then
+			audio='pulse'
+		elif [[ $opcion = 5 ]]; then
+			audio='coreaudio'
+		else
+			echo 'Opción incorrecta.'
+		fi
+		if [[ $audio != $null ]]; then
+			echo '¿Quieres modificar otros atributos? (s/n)'
+			read res2
+			if [[ $res2 = 's' ]]; then
+				cat ./menus/vmconfig/audio/opc_audio.txt
+				read opcion2
+				while [[ $opcion2 != 4 ]]; do
+					if [[ $opcion2 = 1 ]]; then
+						cat ./menus/vmconfig/audio/ctlaudio.txt
+						read opcion3
+						if [[ $opcion3 = 1 ]]; then
+							ctl='ac97'
+						elif [[ $opcion3 = 2 ]]; then
+							ctl='sb16'
+						elif [[ $opcion3 = 3 ]]; then
+							ctl='hda'
+						fi
+					elif [[ $opcion2 = 2 ]]; then
+						echo '¿Quieres habilitar la salida de audio? (s/n)'
+						read res3
+						if [[ $res3 = 's' ]]; then
+							salida='on'
+						elif [[ $res3 = 'n' ]]; then
+							salida='off'
+						fi
+					elif [[ $opcion2 = 3 ]]; then
+                                                echo '¿Quieres habilitar la entrada de audio? (s/n)'
+                                                read res3
+                                                if [[ $res3 = 's' ]]; then
+                                                        entrada='on'
+                                                elif [[ $res3 = 'n' ]]; then
+                                                        entrada='off'
+                                                fi
+					else
+						echo 'Opción incorrecta.'
+					fi
+					cat ./menus/vmconfig/audio/opc_audio.txt
+                                	read opcion2
+				done
+				if [[ $ctl = $null && $entrada = $null && $salida = $null ]]; then
+					vboxmanage modifyvm $1 --audio $audio
+					echo 'Audio habilitado.'
+				elif [[ $ctl = $null && $salida = $null ]]; then
+					vboxmanage modifyvm $1 --audio $audio --audioin $entrada
+                                        echo 'Audio habilitado.'
+				elif [[ $ctl = $null && $entrada = $null ]]; then
+					vboxmanage modifyvm $1 --audio $audio --audioout $salida
+                                        echo 'Audio habilitado.'
+				elif [[ $entrada = $null && $salida = $null ]]; then
+					vboxmanage modifyvm $1 --audio $audio --audiocontroller $ctl
+                                        echo 'Audio habilitado.'
+				elif [[ $ctl = $null ]]; then
+					vboxmanage modifyvm $1 --audio $audio --audioin $entrada --audioout $salida
+                                        echo 'Audio habilitado.'
+				elif [[ $entrada = $null ]]; then
+					vboxmanage modifyvm $1 --audio $audio --audiocontroller $ctl --audioout $salida
+                                        echo 'Audio habilitado.'
+				elif [[ $salida = $null ]]; then
+					vboxmanage modifyvm $1 --audio $audio --audiocontroller $ctl --audioin $entrada
+                                        echo 'Audio habilitado.'
+				else
+					vboxmanage modifyvm $1 --audio $audio --audiocontroller $ctl --audioin $entrada --audioout $salida
+                                        echo 'Audio habilitado.'
+				fi
+			else
+				vboxmanage modifyvm $1 --audio $audio
+				echo 'Audio habilitado.'
+			fi
+		fi
+	else
+		vboxmanage modifyvm --audio none
+		echo 'Audio deshabilitado.'
+	fi
+}
+
+#Esta función configura la pestaña de red en la configuración de una máquina virtual en Virtualbox.
+#Acepta como argumento de entrada el nombre de la máquina virtual.
