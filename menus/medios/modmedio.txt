@@ -1,0 +1,12 @@
+
+¿Qué quieres modificar?
+
+1) Modo de escritura
+2) (Des)habilitar autoreseteo en cada inicio de máquina (solo para discos duros inmutables)
+3) Compactar disco
+4) Tamaño
+5) Mover medio
+6) Establecer nueva localización
+7) Volver al menú anterior
+
+Opción:

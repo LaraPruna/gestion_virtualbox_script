@@ -11,7 +11,6 @@ Selecciona una opción del siguiente menú:
 8) Cambiar el estado de una máquina en ejecución
 9) Gestionar instantáneas
 10) Gestionar dispositivos de almacenamiento
-11) Gestionar el ancho de banda de las máquinas
-12) Salir
+11) Salir
 
 Opción:

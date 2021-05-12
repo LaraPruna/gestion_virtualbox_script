@@ -1,0 +1,11 @@
+
+Selecciona una opción del siguiente menú:
+
+1) Crear medio
+2) Retirar medio de Virtualbox
+3) Mostrar información sobre un medio
+4) Modificar medio
+5) Clonar medio
+6) Volver al menú principal
+
+Opción:

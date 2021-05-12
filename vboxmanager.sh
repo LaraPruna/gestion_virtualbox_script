@@ -24,7 +24,7 @@ if [[ $(f_eres_root;echo $?) = 0 ]]; then
 fi
 cat ./menus/mainmenu.txt
 read opcion
-while [[ $opcion != 12 ]]; do
+while [[ $opcion != 11 ]]; do
 	if [[ $opcion = 1 ]]; then
 		f_vmsinfo
 	elif [[ $opcion = 2 ]]; then
@@ -91,6 +91,8 @@ while [[ $opcion != 12 ]]; do
 		echo 'Introduce el nombre de la máquina virtual:'
                 read vm
 		f_gestionar_instantaneas $vm
+	elif [[ $opcion = 10 ]]; then
+		f_gestionar_medios
 	else
 		echo 'Error. Introduce una opción del menú.'
 	fi

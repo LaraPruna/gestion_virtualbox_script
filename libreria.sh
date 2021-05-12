@@ -294,7 +294,6 @@ function f_registrarvm {
 		echo 'Introduce la ruta absoluta de la máquina virtual:'
 		read vm
 		if [[ $(f_existe_directorio $vm;echo $?) = 0 ]]; then
-En determinadas opciones, devuelve los siguientes códigos:
 			vboxmanage registervm $vm
 			if [[ $(vboxmanage showvminfo $vm &> /dev/null;echo $?) = 0 ]]; then
 				echo 'Máquina registrada.'
@@ -377,7 +376,6 @@ function f_movervm {
 #En determinadas opciones, devuelve los siguientes códigos:
 #- Nombre: 0 si se ha cambiado el nombre y 1 si no se ha cambiado.
 #- Grupo: 0 si se ha cambiado el grupo, 1 si no se ha podido cambiar y 2 si se ha introducido un grupo incorrecto.
-#- Sistema operativo: 0 si se ha cambiado, 1 si no se ha podido cambiar y 2 si se ha introducido un sistema incorrecto.
 #- Fichero de icono: 0 si se ha cambiado y 1 si se ha introducido una ruta incorrecta.
 #- Directorio de instantáneas: 0 si se ha cambiado la ruta, 1 si no se ha podido cambiar y 2 si se ha introducido una ruta incorrecta.
 function f_config_general {
@@ -389,7 +387,7 @@ function f_config_general {
 			read nombre
 			vboxmanage modifyvm $1 --name $nombre
 			if [[ $(vboxmanage showvminfo $nombre &> /dev/null; echo $?) = 0 ]]; then
-				echo 'Nombre cambiado.'
+				echo 'Nombre cambiado. Ve al menú principal y vuelve a entrar para seguir configurando la máquina.'
 				return 0
 			else
 				echo 'Error. Nombre no cambiado.'
@@ -432,13 +430,7 @@ function f_config_general {
 			done
 			if [[ $(vboxmanage list ostypes | egrep $os) ]]; then
 				vboxmanage modifyvm $1 --ostype $os
-				if [[ $(vboxmanage showvminfo $1 | awk '{print $3}' | egrep $os) ]]; then
-					echo 'Sistema operativo modificado.'
-					return 0
-				else
-					echo 'Error. No se ha cambiado el sistema operativo.'
-					return 1
-				fi
+				echo 'Sistema operativo modificado.'
 			else
 				echo 'No hay disponible ningún sistema operativo con ese nombre.'
 				return 2
@@ -2209,6 +2201,193 @@ function f_gestionar_instantaneas {
 			echo 'Opción incorrecta.'
 		fi
 		cat ./menus/instantaneas.txt
+        	read opcion
+	done
+}
+
+#Esta funcion permite gestionar los dispositivos de almacenamiento en virtualbox.
+#No recibe ningún argumento de entrada.
+function f_gestionar_medios {
+	cat ./menus/medios/medios.txt
+	read opcion
+	while [[ $opcion != 6 ]]; do
+		if [[ $opcion = 1 ]]; then
+			echo 'Introduce una ruta absoluta para el nuevo medio:'
+			read ruta
+			echo '¿Quieres especificar el tamaño en MB o en bytes? (MB/B)'
+			read medida
+			if [[ $medida = 'MB' ]]; then
+				echo 'Introduce el tamaño en MB:'
+				read size
+			elif [[ $medida = 'B' ]]; then
+				echo 'Introduce el tamaño en bytes:'
+				read size
+			fi
+			echo '¿Quieres especificar un formato para el medio (por defecto, VDI)? (s/n)'
+			read res2
+			if [[ $res2 = 's' ]]; then
+				echo '¿(VDI), (VMDK) o (VHD)?'
+				read formato
+				if [[ $medida = 'MB' ]]; then
+                                        vboxmanage createmedium --filename $ruta --size $size --format $formato
+                                elif [[ $medida = 'B' ]]; then
+                                        vboxmanage createmedium --filename $ruta --sizebyte $size --format $formato
+                                fi
+			else
+				if [[ $medida = 'MB' ]]; then
+                                        vboxmanage createmedium --filename $ruta --size $size
+                                elif [[ $medida = 'B' ]]; then
+                                        vboxmanage createmedium --filename $ruta --sizebyte $size
+                                fi
+			fi
+		elif [[ $opcion = 2 ]]; then
+			echo '¿Qué tipo de medio quieres retirar (hdd/dvd/disquete)?'
+			read tipo
+			if [[ $tipo = 'hdd' ]]; then
+				vboxmanage list hdds | egrep '(UUID|Location)'
+			elif [[ $tipo = 'dvd' ]]; then
+				vboxmanage list dvds | egrep '(UUID|Location)'
+			elif [[ $tipo = 'disquete' ]]; then
+				vboxmanage list floppies | egrep '(UUID|Location)'
+			fi
+			echo 'Introduce la UUID o la localización del medio:'
+			read medio
+			echo '¿Quieres eliminar también el fichero del medio? (s/n)'
+			read res
+			if [[ $res = 's' ]]; then
+				vboxmanage closemedium $medio --delete
+				echo 'Medio retirado de Virtualbox y eliminado.'
+			else
+				vboxmanage closemedium $medio
+				echo 'Medio retirado de Virtualbox.'
+			fi
+		elif [[ $opcion = 3 ]]; then
+			echo '¿Qué tipo de medio quieres ver (hdd/dvd/disquete)?'
+                        read tipo
+                        if [[ $tipo = 'hdd' ]]; then
+                                vboxmanage list hdds | egrep '(UUID|Location)'
+                        elif [[ $tipo = 'dvd' ]]; then
+                                vboxmanage list dvds | egrep '(UUID|Location)'
+                        elif [[ $tipo = 'disquete' ]]; then
+                                vboxmanage list floppies | egrep '(UUID|Location)'
+                        fi
+                        echo 'Introduce la UUID o la localización del medio:'
+                        read medio
+			vboxmanage showmediuminfo $medio
+		elif [[ $opcion = 4 ]]; then
+			echo '¿Qué tipo de medio quieres modificar (hdd/dvd/disquete)?'
+                        read tipo
+                        if [[ $tipo = 'hdd' ]]; then
+                                vboxmanage list hdds | egrep '(UUID|Location)'
+                        elif [[ $tipo = 'dvd' ]]; then
+                                vboxmanage list dvds | egrep '(UUID|Location)'
+                        elif [[ $tipo = 'disquete' ]]; then
+                                vboxmanage list floppies | egrep '(UUID|Location)'
+                        fi
+                        echo 'Introduce la UUID o la localización del medio:'
+                        read medio
+			f_modificar_medio $medio
+		elif [[ $opcion = 5 ]]; then
+			echo '¿Qué tipo de medio quieres clonar (hdd/dvd/disquete)?'
+                        read tipo
+                        if [[ $tipo = 'hdd' ]]; then
+                                vboxmanage list hdds | egrep '(UUID|Location)'
+                        elif [[ $tipo = 'dvd' ]]; then
+                                vboxmanage list dvds | egrep '(UUID|Location)'
+                        elif [[ $tipo = 'disquete' ]]; then
+                                vboxmanage list floppies | egrep '(UUID|Location)'
+                        fi
+			echo 'Introduce la UUID o la localización del medio que quieres clonar:'
+			read medioorigen
+			echo 'Introduce la UUID o la localización del medio de destino:'
+			read mediodestino
+			echo '¿El medio de destino ya existe? (s/n)'
+			read res
+			if [[ $res = 's' ]]; then
+				vboxmanage clonemedium $medioorigen $mediodestino --existing
+			else
+				vboxmanage clonemedium $medioorigen $mediodestino
+			fi
+			echo 'Medio clonado.'
+		else
+			echo 'Opción incorrecta.'
+		fi
+		cat ./menus/medios/medios.txt
+        	read opcion
+	done
+}
+
+#Esta función modifica un medio de almacenamiento en Virtualbox.
+#Acepta como argumento el nombre o la uuid del medio.
+function f_modificar_medio {
+	cat ./menus/medios/modmedio.txt
+	read opcion
+	while [[ $opcion != 7 ]]; do
+		if [[ $opcion = 1 ]]; then
+			cat ./menus/medios/modoescritura.txt
+			read opcion2
+			if [[ $opcion2 = 1 ]]; then
+				vboxmanage modifymedium $1 --type normal
+			elif [[ $opcion2 = 2 ]]; then
+				vboxmanage modifymedium $1 --type writethrough
+			elif [[ $opcion2 = 3 ]]; then
+				vboxmanage modifymedium $1 --type shareable
+			elif [[ $opcion2 = 4 ]]; then
+				vboxmanage modifymedium $1 --type immutable
+			elif [[ $opcion2 = 5 ]]; then
+				vboxmanage modifymedium $1 --type multiattach
+			elif [[ $opcion2 = 6 ]]; then
+				vboxmanage modifymedium $1 --type readonly
+			fi
+			echo 'Modo de escritura modificada.'
+		elif [[ $opcion = 2 ]]; then
+			echo '¿Quieres habilitar el autoreseteo? (s/n)'
+			read res
+			if [[ $res = 's' ]]; then
+				vboxmanage modifymedium $1 --autoreset on
+				echo 'Autoreseteo activado.'
+			elif [[ $res = 'n' ]]; then
+				vboxmanage modifymedium $1 --autoreset off
+				echo 'Autoreseteo desactivado.'
+			fi
+		elif [[ $opcion = 3 ]]; then
+			vboxmanage modifymedium $1 --compact
+			echo 'Disco compactado.'
+		elif [[ $opcion = 4 ]]; then
+			echo '¿Quieres especificar el tamaño en MB o en bytes? (MB/B)'
+                        read medida
+                        if [[ $medida = 'MB' ]]; then
+                        	echo 'Introduce el tamaño en MB:'
+                                read size
+				vboxmanage modifymedium $1 --resize $size
+                        elif [[ $medida = 'B' ]]; then
+                                echo 'Introduce el tamaño en bytes:'
+                                read size
+				vboxmanage modifymedium $1 --resizebyte $size
+                        fi
+			echo 'Tamaño modificado.'
+		elif [[ $opcion = 5 ]]; then
+			echo 'Introduce la ruta relativa o absoluta de la nueva ruta:'
+			read ruta
+			if [[ $(f_existe_directorio $ruta;echo $?) = 0 ]]; then
+				vboxmanage modifymedium $1 --move $ruta
+				echo "Medio movido a $ruta. Recuerda cambiar la localización del medio en la opción 6 del menú."
+			else
+				echo 'Ruta no modificada.'
+			fi
+		elif [[ $opcion = 6 ]]; then
+			echo 'Introduce la nueva ruta del medio (con el nombre del medio incluido):'
+			read ruta
+			if [[ -e $ruta ]]; then
+				vboxmanage modifymedium $1 --setlocation $ruta
+				echo 'Localización modificada.'
+			else
+				echo 'Medio no encontrado.'
+			fi
+		else
+			echo 'Opción incorrecta.'
+		fi
+		cat ./menus/medios/modmedio.txt
         	read opcion
 	done
 }

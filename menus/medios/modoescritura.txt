@@ -1,0 +1,11 @@
+
+Elige un modo de escritura de la siguiente lista:
+
+1) Normal
+2) Escritura simultánea
+3) Compartible
+4) Inmutable
+5) Modo multiconexión
+6) Solo lectura
+
+Opción:
