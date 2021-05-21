@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Este script permite administrar nuestras máquinas virtuales de VirtualBox
+# (iniciar las máquinas, crearlas, eliminarlas, clonarlas, configurarlas, etc.)
+# Ha sido probado en Debian 10 Buster, por lo que no puedo asegurar su
+# correcto funcionamiento en otros sistemas.
+
 . ./libreria.sh
 
 echo 'Inicio del programa. Comprobando el estado del paquete virtualbox...'
